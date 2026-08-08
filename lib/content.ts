@@ -3,7 +3,11 @@
 
 import type { Band, ChoiceAnswer } from "./scoring";
 
+// Configurable vía NEXT_PUBLIC_CALENDLY_URL en Vercel sin tocar código.
+// El valor hardcodeado es el fallback: si la env var no está definida, el
+// botón sigue funcionando con el link actual.
 export const CALENDLY_URL =
+  process.env.NEXT_PUBLIC_CALENDLY_URL ||
   "https://calendly.com/asesoriasinfronterasglobal03/diagnostico-de-viabilidad-webinar";
 
 export const CONSENT_COPY =
@@ -119,46 +123,46 @@ export const QUESTIONS: Question[] = [
 // ---------------------------------------------------------------------------
 
 export type BandCopy = {
-  titleLead: string;      // Parte del título en cream (sobre navy).
-  titleAccent: string;    // Palabra/frase que sale en gold.
-  accent: string;         // Cormorant Garamond italic. Una línea emocional.
-  body: string[];         // 2-3 líneas de cuerpo.
-  cta: string;            // Texto del botón que lleva a Calendly.
+  title: string;      // Título grande de la banda. Gold, Montserrat 900.
+  paragraph: string;  // Lectura del momento de la persona. 2-3 líneas.
+  loop: string;       // Loop abierto: puente entre el resultado y la llamada.
+  cta: string;        // Texto del botón que lleva a Calendly.
 };
 
 // Bold inline con `**palabra**` — renderizado por `renderRich()`.
 export const BAND_COPY: Record<Band, BandCopy> = {
   alto: {
-    titleLead: "Nivel de preparación:",
-    titleAccent: "Alto",
-    accent: "Has hecho la tarea. Se nota.",
-    body: [
-      "Tu proceso tiene estructura y las señales apuntan a que llegas a tu entrevista con **base sólida**.",
-      "Aún así, en esta etapa los **detalles pequeños** son los que marcan la diferencia — el tipo de cosas que solo un ojo experto detecta antes de que se conviertan en un problema.",
-    ],
-    cta: "Agendar mi llamada de revisión",
+    title: "Nivel de Preparación: Alto",
+    paragraph:
+      "Vas bien. Tienes tu documentación en orden, tus fechas claras y ya has practicado contar tu historia. Eso te pone por delante de la mayoría de las personas que llegan a su entrevista.",
+    loop:
+      "Lo que sigue no es empezar de cero — es **afinar**. Los detalles que marcan la diferencia en una entrevista real no se ven desde adentro, se detectan con alguien que ya ha estado en cientos de estos procesos.",
+    cta: "Afinar mi preparación",
   },
   intermedio: {
-    titleLead: "Nivel de preparación:",
-    titleAccent: "Intermedio",
-    accent: "Ya avanzaste. Falta ordenar el resto.",
-    body: [
-      "Tienes piezas importantes en su lugar y a la vez **piezas sueltas** que, si no se ordenan a tiempo, pueden terminar jugando en tu contra el día de la entrevista.",
-      "El siguiente paso es **identificar exactamente qué falta cerrar** y en qué orden, antes de que el reloj apriete.",
-    ],
-    cta: "Agendar mi llamada de preparación",
+    title: "Nivel de Preparación: Intermedio",
+    paragraph:
+      "Tienes avanzado lo esencial, pero hay piezas sueltas. No es que estés mal preparado — es que todavía no tienes todo junto y en orden, y eso en una entrevista se nota.",
+    loop:
+      "Ya sabes en qué punto estás. Lo que todavía no tienes es el **plan exacto** para cerrar esas brechas antes de tu fecha. Eso es justo lo que resolvemos en una llamada.",
+    cta: "Ver mi plan de preparación",
   },
   por_reforzar: {
-    titleLead: "Nivel de preparación:",
-    titleAccent: "Por Reforzar",
-    accent: "Estás al inicio. Eso también es un lugar válido.",
-    body: [
-      "La mayoría de personas que hoy tienen su caso resuelto **empezaron exactamente donde tú estás**. Lo importante es que no lo transites a ciegas.",
-      "El siguiente paso es **trazar contigo el mapa completo** — qué va primero, qué puede esperar, y qué necesitas tener listo antes de tu próxima fecha.",
-    ],
-    cta: "Agendar mi llamada de orientación",
+    title: "Nivel de Preparación: Por Reforzar",
+    paragraph:
+      "Hay bastante por trabajar, y está bien que lo sepas ahora y no la semana antes de tu entrevista. Muchas personas llegan a este punto sin darse cuenta de todo lo que falta.",
+    loop:
+      "Este diagnóstico te muestra dónde estás parado. El siguiente paso es **armar el orden** en que hay que trabajar cada cosa — y ahí sí conviene hacerlo acompañado.",
+    cta: "Empezar a prepararme",
   },
 };
+
+// Copy fijo de la pantalla de resultado (igual para las 3 bandas).
+export const RESULT_COPY = {
+  greeting: (nombre: string) => (nombre ? `Listo, ${nombre}.` : "Listo."),
+  reinforcementsTitle: "Lo que conviene reforzar",
+  ctaMicrocopy: "Sin costo. 20 minutos. Hablas directamente con nuestro equipo.",
+} as const;
 
 // Copy transversal de la UI.
 export const UI_COPY = {

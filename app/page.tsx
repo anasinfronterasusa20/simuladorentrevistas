@@ -9,9 +9,11 @@ import {
   CALENDLY_URL,
   CONSENT_COPY,
   QUESTIONS,
+  RESULT_COPY,
   UI_COPY,
   type Question,
 } from "@/lib/content";
+import { getReinforcements } from "@/lib/reinforcements";
 import { renderRich } from "@/lib/renderRich";
 import type { Answers, Band, ChoiceAnswer, ScaleAnswer } from "@/lib/scoring";
 
@@ -19,7 +21,7 @@ type Step =
   | { kind: "intro" }
   | { kind: "question"; index: number }
   | { kind: "optin" }
-  | { kind: "result"; band: Band };
+  | { kind: "result"; band: Band; nombre: string };
 
 type PartialAnswers = Partial<Answers>;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -138,11 +140,19 @@ function Diagnostico() {
             answers={answers as Answers}
             webinarSource={webinarSource}
             onBack={goBack}
-            onDone={(band) => setStep({ kind: "result", band })}
+            onDone={(band, nombre) =>
+              setStep({ kind: "result", band, nombre })
+            }
           />
         )}
 
-        {step.kind === "result" && <ResultStep band={step.band} />}
+        {step.kind === "result" && (
+          <ResultStep
+            band={step.band}
+            nombre={step.nombre}
+            answers={answers as Answers}
+          />
+        )}
       </main>
 
       <footer className="footer">
@@ -324,7 +334,7 @@ function OptInStep({
   answers: Answers;
   webinarSource: string | null;
   onBack: () => void;
-  onDone: (band: Band) => void;
+  onDone: (band: Band, nombre: string) => void;
 }) {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
@@ -372,7 +382,7 @@ function OptInStep({
         return;
       }
       const data = (await res.json()) as { band: Band };
-      onDone(data.band);
+      onDone(data.band, nombre.trim());
     } catch (err) {
       if ((err as { name?: string })?.name === "AbortError") return;
       setError(UI_COPY.errors.generic);
@@ -491,25 +501,46 @@ function OptInStep({
 // Result (navy hero)
 // ---------------------------------------------------------------------------
 
-function ResultStep({ band }: { band: Band }) {
+function ResultStep({
+  band,
+  nombre,
+  answers,
+}: {
+  band: Band;
+  nombre: string;
+  answers: Answers;
+}) {
   const copy = BAND_COPY[band];
+  const reinforcements = getReinforcements(answers);
+
   return (
     <section className="surface surface--navy on-navy">
       <BrandStrip variant="on-navy" />
-      <div className="surface__content">
-        <p className="result-meta">Tu resultado</p>
-        <h2 className="headline headline--hero">
-          {copy.titleLead}{" "}
-          <span className="headline__accent">{copy.titleAccent}</span>
-        </h2>
-        <p className="accent">{copy.accent}</p>
-        {copy.body.map((line, i) => (
-          <p key={i} className="body">
-            {renderRich(line)}
-          </p>
-        ))}
+
+      <p className="result-greeting">{RESULT_COPY.greeting(nombre)}</p>
+
+      <h2 className="headline headline--hero headline--gold">{copy.title}</h2>
+
+      <p className="body">{copy.paragraph}</p>
+
+      <div className="reinforce">
+        <h3 className="reinforce__title">
+          {RESULT_COPY.reinforcementsTitle}
+        </h3>
+        <ul className="reinforce__list">
+          {reinforcements.map((item) => (
+            <li key={item} className="reinforce__item">
+              {item}
+            </li>
+          ))}
+        </ul>
       </div>
+
+      <p className="body">{renderRich(copy.loop)}</p>
+
       <div className="result-cta-row">
+        {/* target="_blank": la herramienta vive dentro de un iframe en
+            WordPress — Calendly nunca debe abrirse dentro del iframe. */}
         <a
           className="btn btn--gold"
           href={CALENDLY_URL}
@@ -518,6 +549,7 @@ function ResultStep({ band }: { band: Band }) {
         >
           {copy.cta}
         </a>
+        <p className="result-microcopy">{RESULT_COPY.ctaMicrocopy}</p>
       </div>
     </section>
   );
