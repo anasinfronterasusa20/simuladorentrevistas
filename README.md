@@ -1,6 +1,8 @@
-# SFG — Diagnóstico de preparación
+# SFG — Diagnóstico Flash
 
-Herramienta de diagnóstico post-webinar para Sin Fronteras Global. 7 preguntas → banda cualitativa (Alto / Intermedio / Por Reforzar) → CTA a Calendly. Se embebe vía iframe en la landing de WordPress.
+Herramienta gratuita de diagnóstico post-webinar para Sin Fronteras Global. 7 preguntas → banda cualitativa (Alto / Intermedio / Por Reforzar) → CTA a Calendly. Se embebe vía iframe en la landing de WordPress.
+
+> Nota de branding: "Diagnóstico Flash" es el nombre de esta herramienta gratuita. NO usar el nombre del producto pagado de SFG (el que empieza con S y termina en R) en ningún texto ni metadata de este proyecto — está reservado para el producto de pago.
 
 ## Setup local
 

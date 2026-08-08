@@ -20,9 +20,9 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Simulador de preparación — Sin Fronteras Global",
+  title: "Diagnóstico Flash — Sin Fronteras Global",
   description:
-    "Simulador de preparación para la entrevista de asilo. Herramienta interna para asistentes al webinar de Sin Fronteras Global.",
+    "Diagnóstico Flash: herramienta breve de preparación para la entrevista de asilo. Uso interno para asistentes al webinar de Sin Fronteras Global.",
   robots: { index: false, follow: false },
 };
 
