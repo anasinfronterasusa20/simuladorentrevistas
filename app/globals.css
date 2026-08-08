@@ -1,0 +1,748 @@
+/* =============================================================================
+   Sin Fronteras Global — Design System
+   =============================================================================
+   Reglas duras:
+   - Sin gradientes, sin texturas, sin patrones, sin emojis.
+   - Montserrat Black 900 uppercase para títulos.
+   - Cormorant Garamond 400 italic SOLO para líneas de acento emocional.
+   - Cuerpo de texto: Montserrat 400/500.
+   - Todo mobile-first. Escalamos con clamp() y grid columns adaptivos.
+   ============================================================================= */
+
+:root {
+  /* --- Paleta de marca --- */
+  --navy: #1B2E48;
+  --navy-deep: #142236;
+  --navy-light: #2A4569;   /* variante más clara para gradientes */
+  --navy-glow: #34537D;    /* highlight sutil sobre navy */
+  --gold: #D4A234;
+  --gold-hover: #C0912B;
+  --gold-dark: #A87D22;    /* borde sutil sobre gold para contraste con texto blanco */
+  --cream: #EDE5CA;
+  --cream-warm: #F5EED9;
+
+  /* Alphas para bordes / states */
+  --navy-08: rgba(27, 46, 72, 0.08);
+  --navy-12: rgba(27, 46, 72, 0.12);
+  --navy-20: rgba(27, 46, 72, 0.20);
+  --navy-70: rgba(27, 46, 72, 0.70);
+
+  --cream-70: rgba(237, 229, 202, 0.70);
+  --cream-15: rgba(237, 229, 202, 0.15);
+  --cream-08: rgba(237, 229, 202, 0.08);
+
+  --gold-25: rgba(212, 162, 52, 0.25);
+  --gold-15: rgba(212, 162, 52, 0.15);
+  --gold-08: rgba(212, 162, 52, 0.08);
+
+  --surface: #FFFFFF;
+  --error: #B0342B;
+  --error-bg: rgba(176, 52, 43, 0.06);
+
+  /* --- Tipografía --- */
+  --font-display: var(--font-montserrat), "Helvetica Neue", Arial, sans-serif;
+  --font-accent: var(--font-cormorant), Georgia, "Times New Roman", serif;
+
+  /* --- Espaciado --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+
+  /* --- Radios --- */
+  --radius-surface: 24px;
+  --radius-card: 16px;
+  --radius-input: 14px;
+  --radius-pill: 999px;
+
+  /* --- Sombras --- */
+  --shadow-surface: 0 20px 50px -20px rgba(27, 46, 72, 0.25);
+  --shadow-navy: 0 20px 60px -20px rgba(20, 34, 54, 0.55);
+}
+
+/* =============================================================================
+   Reset & base
+   ============================================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+html { background: var(--cream); scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--navy);
+  background: var(--cream);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+button, input, select, textarea { font-family: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* =============================================================================
+   Layout base
+   ============================================================================= */
+.page {
+  min-height: 100vh;
+  min-height: 100dvh; /* modern: excluye browser chrome dinámico en móvil */
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 720px) {
+  .page { padding: var(--sp-7) var(--sp-6); }
+}
+
+.stage {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  width: 100%;
+  max-width: 720px;
+  margin: var(--sp-5) auto var(--sp-4);
+  padding: 0 var(--sp-4);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--navy-70);
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+@media (min-width: 720px) {
+  .footer { margin-top: var(--sp-6); padding: 0 var(--sp-3); }
+}
+
+/* =============================================================================
+   Surfaces (superficies tipo "card" que envuelven cada paso)
+   ============================================================================= */
+.surface {
+  position: relative;
+  padding: var(--sp-6) var(--sp-5);
+  overflow: hidden;
+}
+@media (min-width: 720px) {
+  .surface {
+    padding: var(--sp-7) var(--sp-7);
+    border-radius: var(--radius-surface);
+  }
+}
+
+/* MÓVIL: ambas superficies ocupan todo el viewport (edge-to-edge, full-height).
+   Sin border-radius, sin margen. La superficie fluye para llenar la stage vía flex. */
+@media (max-width: 719px) {
+  .surface--navy,
+  .surface--cream {
+    border-radius: 0;
+    margin: 0;
+    padding-top: var(--sp-7);
+    padding-bottom: var(--sp-7);
+    flex: 1;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* El último bloque (CTA / botones de navegación) se empuja al fondo del
+     viewport. Patrón de hero móvil: contenido arriba, acción al pulgar abajo.
+     No aplica al opt-in porque su último hijo es <form>, no un btn-row directo. */
+  .surface > .btn-row:last-child,
+  .surface > .result-cta-row:last-child {
+    margin-top: auto;
+  }
+
+  /* Bloque de contenido: crece para llenar el espacio entre brand-strip y CTA,
+     y reparte sus hijos con `space-evenly` — gaps iguales incluyendo los
+     márgenes superior/inferior del wrapper. Combinado con fuentes más grandes
+     en móvil, el contenido llena visualmente el viewport sin hueco muerto. */
+  .surface__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+  /* Reseteamos margins naturales para que space-evenly trabaje limpio */
+  .surface__content > * { margin-top: 0; margin-bottom: 0; }
+
+  /* Botón único ocupa el ancho completo en móvil para ganar presencia. */
+  .btn-row--start .btn,
+  .result-cta-row .btn {
+    flex: 1 1 100%;
+  }
+}
+
+.surface--navy {
+  background:
+    radial-gradient(ellipse 90% 60% at 15% 0%, var(--navy-glow) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 80% at 100% 100%, var(--navy-deep) 0%, transparent 60%),
+    linear-gradient(140deg, var(--navy-light) 0%, var(--navy) 45%, var(--navy-deep) 100%);
+  color: var(--cream);
+  box-shadow: var(--shadow-navy);
+}
+.surface--cream {
+  background: var(--surface);
+  color: var(--navy);
+  box-shadow: var(--shadow-surface);
+  border: 1px solid var(--navy-08);
+}
+
+/* Decoración sutil: quarter-ring en la esquina superior derecha. */
+.surface--navy::before {
+  content: "";
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-25);
+  pointer-events: none;
+}
+.surface--navy::after {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 1px solid var(--cream-15);
+  pointer-events: none;
+}
+
+/* =============================================================================
+   Brand strip (logo + IG handle)
+   ============================================================================= */
+.brand-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+  position: relative;
+  z-index: 1;
+}
+
+.brand-strip__logo {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+}
+@media (min-width: 720px) {
+  .brand-strip__logo { height: 52px; }
+}
+
+.brand-strip__ig {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  transition: background 0.15s ease;
+}
+.brand-strip--on-navy .brand-strip__ig:hover { background: var(--cream-08); }
+.brand-strip--on-cream .brand-strip__ig:hover { background: var(--navy-08); }
+
+@media (max-width: 460px) {
+  .brand-strip__ig span { display: none; }
+  .brand-strip__logo { height: 40px; }
+}
+
+/* =============================================================================
+   Tipografía
+   ============================================================================= */
+.kicker {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 var(--sp-4);
+  position: relative;
+  z-index: 1;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.headline--hero { font-size: clamp(36px, 10vw, 52px); }
+.headline--lg   { font-size: clamp(26px, 7vw, 34px);   line-height: 1.1; }
+.headline--md   { font-size: clamp(20px, 4.5vw, 26px); line-height: 1.15; }
+
+.headline__accent { color: var(--gold); }
+
+.on-navy  .headline { color: var(--cream); }
+.on-cream .headline { color: var(--navy); }
+
+.accent {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(20px, 5vw, 24px);
+  line-height: 1.4;
+  margin: var(--sp-4) 0 0;
+  position: relative;
+  z-index: 1;
+}
+.on-navy  .accent { color: var(--cream-70); }
+.on-cream .accent { color: var(--navy-70); }
+
+.body {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.7;
+  margin: var(--sp-4) 0 0;
+  position: relative;
+  z-index: 1;
+}
+@media (min-width: 720px) {
+  .body { font-size: 16px; line-height: 1.65; }
+}
+.on-navy  .body { color: var(--cream); }
+.on-cream .body { color: var(--navy); }
+
+/* Bold inline: emphasis sutil de palabras clave dentro del cuerpo. */
+.body strong { font-weight: 700; }
+.on-navy  .body strong { color: #FFFFFF; }
+.on-cream .body strong { color: var(--navy); }
+
+/* =============================================================================
+   Progress
+   ============================================================================= */
+.progress {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-5);
+}
+
+.progress__track {
+  flex: 1;
+  height: 6px;
+  background: var(--navy-08);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.progress__fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px var(--gold-25);
+}
+
+.progress__count {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--navy);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =============================================================================
+   Botones (todos pill)
+   ============================================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 60px;
+  padding: 0 var(--sp-6);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 14px;
+  transition: background-color 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+  line-height: 1;
+  text-align: center;
+}
+@media (min-width: 720px) {
+  .btn { min-height: 52px; font-size: 13px; }
+}
+.btn:active { transform: translateY(1px); }
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy) 50%, var(--navy-deep) 100%);
+  color: #FFFFFF;
+  box-shadow: 0 10px 22px -10px rgba(27, 46, 72, 0.55);
+}
+.btn--primary:hover {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 60%, #0E1826 100%);
+}
+
+.btn--gold {
+  background: var(--gold);
+  color: #FFFFFF;
+  box-shadow: 0 10px 22px -10px rgba(212, 162, 52, 0.6);
+}
+.btn--gold:hover { background: var(--gold-hover); }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--navy-70);
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  box-shadow: none;
+}
+.btn--ghost:hover { color: var(--navy); background: var(--navy-08); }
+
+.on-navy .btn--ghost { color: var(--cream-70); }
+.on-navy .btn--ghost:hover { color: var(--cream); background: var(--cream-08); }
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+  flex-wrap: wrap;
+}
+.btn-row--start { justify-content: flex-start; }
+
+/* En móvil, los botones ocupan ancho completo si no hay espacio */
+@media (max-width: 420px) {
+  .btn--primary, .btn--gold { flex: 1 1 100%; }
+  .btn--ghost { flex: 1 1 auto; }
+}
+
+/* =============================================================================
+   Opciones (choice)
+   ============================================================================= */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: var(--sp-5) 0 0;
+}
+
+.option {
+  display: block;
+  padding: var(--sp-5) var(--sp-5);
+  background: var(--surface);
+  border: 2px solid var(--navy-12);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.05s ease;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--navy);
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  font-weight: 500;
+}
+.option:hover { border-color: var(--navy-20); background: var(--cream-warm); }
+.option:active { transform: scale(0.995); }
+
+.option--selected {
+  border-color: var(--navy);
+  background: var(--gold-15);
+  color: var(--navy);
+}
+.option--selected:hover { background: var(--gold-15); }
+
+/* =============================================================================
+   Escala 1-10 (Q6)
+   Desktop: 10 columnas. Mobile: 5 columnas × 2 filas.
+   ============================================================================= */
+.scale { margin: var(--sp-5) 0 0; }
+
+.scale__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+@media (min-width: 560px) {
+  .scale__grid { grid-template-columns: repeat(10, 1fr); }
+}
+
+.scale__btn {
+  aspect-ratio: 1;
+  background: var(--surface);
+  border: 2px solid var(--navy-12);
+  border-radius: var(--radius-card);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.05s ease;
+}
+.scale__btn:hover { border-color: var(--navy-20); background: var(--cream-warm); }
+.scale__btn:active { transform: scale(0.96); }
+
+.scale__btn--selected {
+  background: var(--navy);
+  color: var(--cream);
+  border-color: var(--navy);
+}
+.scale__btn--selected:hover { background: var(--navy-deep); }
+
+.scale__anchors {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: 11px;
+  color: var(--navy-70);
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+/* =============================================================================
+   Formulario opt-in
+   ============================================================================= */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-top: var(--sp-5);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.field__label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+
+.field__help {
+  font-size: 12px;
+  color: var(--navy-70);
+}
+
+.input {
+  height: 52px;
+  padding: 0 var(--sp-4);
+  background: var(--surface);
+  border: 2px solid var(--navy-12);
+  border-radius: var(--radius-input);
+  color: var(--navy);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+}
+.input:focus { border-color: var(--navy); }
+.input::placeholder { color: var(--navy-70); opacity: 0.55; }
+
+/* react-phone-number-input overrides */
+.PhoneInput {
+  height: 52px;
+  padding: 0 var(--sp-4);
+  background: var(--surface);
+  border: 2px solid var(--navy-12);
+  border-radius: var(--radius-input);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  transition: border-color 0.15s ease;
+}
+.PhoneInput--focus { border-color: var(--navy); }
+.PhoneInputInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--navy);
+  font-size: 15px;
+  font-family: inherit;
+  height: 100%;
+  min-width: 0;
+  flex: 1;
+}
+.PhoneInputCountry { align-self: center; }
+.PhoneInputCountrySelect { color: var(--navy); font-family: inherit; }
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 2px solid var(--navy-12);
+  background: var(--surface);
+  border-radius: var(--radius-input);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.consent:hover { border-color: var(--navy-20); }
+.consent input[type="checkbox"] {
+  margin: 3px 0 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--navy);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.consent__text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--navy);
+}
+
+.error {
+  color: var(--error);
+  font-size: 13px;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-input);
+  background: var(--error-bg);
+  border: 1px solid rgba(176, 52, 43, 0.2);
+  font-weight: 500;
+}
+
+/* =============================================================================
+   Resultado (hero navy)
+   ============================================================================= */
+.result-meta {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: var(--sp-4);
+  position: relative;
+  z-index: 1;
+}
+
+.result-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+  position: relative;
+  z-index: 1;
+}
+
+/* =============================================================================
+   Loading
+   ============================================================================= */
+.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(27, 46, 72, 0.25);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.btn--gold .spinner {
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #FFFFFF;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* =============================================================================
+   Focus visible (accesibilidad)
+   ============================================================================= */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+button:focus-visible,
+a:focus-visible {
+  outline-offset: 3px;
+}
+
+/* =============================================================================
+   Oculta overlays de dev de Next.js (solo visibles en desarrollo).
+   Bitdefender y similares inyectan atributos en el DOM que disparan warnings
+   que el overlay reporta como "1 Issue". En producción no aparece nada de esto.
+   ============================================================================= */
+nextjs-portal,
+[data-nextjs-toast],
+[data-nextjs-toast-errors-parent],
+nextjs-toast-errors,
+#__next-build-watcher,
+#__nextjs-toast-container {
+  display: none !important;
+}
+
+/* =============================================================================
+   Fade-in animations
+   Surfaces se animan al montarse (cada step re-monta vía key en React).
+   Options y scale buttons se animan al seleccionarse.
+   ============================================================================= */
+@keyframes stepFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.surface {
+  animation: stepFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes optionSelected {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.option--selected,
+.scale__btn--selected {
+  animation: optionSelected 0.35s ease-out;
+}
+
+/* Respeto por usuarios con motion sickness / preferencia de reducción */
+@media (prefers-reduced-motion: reduce) {
+  .surface,
+  .option--selected,
+  .scale__btn--selected,
+  .progress__fill {
+    animation: none;
+    transition: none;
+  }
+}
