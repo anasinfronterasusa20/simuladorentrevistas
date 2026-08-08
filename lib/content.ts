@@ -7,7 +7,7 @@ export const CALENDLY_URL =
   "https://calendly.com/asesoriasinfronterasglobal03/diagnostico-de-viabilidad-webinar";
 
 export const CONSENT_COPY =
-  "Acepto que el equipo de Sin Fronteras Global me contacte por correo o WhatsApp para darle seguimiento a mi diagnóstico. Tus respuestas nos ayudan a prepararte mejor — no se comparten con nadie más.";
+  "Acepto que el equipo de Sin Fronteras Global me contacte por correo o WhatsApp para darle seguimiento a mi simulador. Tus respuestas nos ayudan a prepararte mejor — no se comparten con nadie más.";
 
 // ---------------------------------------------------------------------------
 // Preguntas — orden y texto fijos por instrucción del cliente.
@@ -146,7 +146,7 @@ export const BAND_COPY: Record<Band, BandCopy> = {
       "Tienes piezas importantes en su lugar y a la vez **piezas sueltas** que, si no se ordenan a tiempo, pueden terminar jugando en tu contra el día de la entrevista.",
       "El siguiente paso es **identificar exactamente qué falta cerrar** y en qué orden, antes de que el reloj apriete.",
     ],
-    cta: "Agendar mi llamada de diagnóstico",
+    cta: "Agendar mi llamada de preparación",
   },
   por_reforzar: {
     titleLead: "Nivel de preparación:",
@@ -163,18 +163,18 @@ export const BAND_COPY: Record<Band, BandCopy> = {
 // Copy transversal de la UI.
 export const UI_COPY = {
   intro: {
-    kicker: "Diagnóstico de preparación",
+    kicker: "Simulador: preparación para tu entrevista",
     titleLead: "Vamos a ver",
     titleAccent: "dónde estás parado hoy",
     accent:
       "Siete preguntas. Cinco minutos. Una lectura honesta de tu momento.",
     body:
-      "Este diagnóstico no evalúa tu caso legal ni predice resultados. Es una herramienta para que tú y nuestro equipo tengamos **claridad** sobre en qué punto de la **preparación** estás — y qué necesitas **priorizar antes de tu entrevista**.",
-    startCta: "Comenzar diagnóstico",
+      "Este simulador no evalúa tu caso legal ni predice resultados. Es una herramienta para que tú y nuestro equipo tengamos **claridad** sobre en qué punto de la **preparación** estás — y qué necesitas **priorizar antes de tu entrevista**.",
+    startCta: "Comenzar simulador",
   },
   optIn: {
     title: "Un último paso antes de tu resultado",
-    accent: "Para que podamos darle seguimiento a tu diagnóstico.",
+    accent: "Para que podamos darle seguimiento a tu resultado.",
     nombreLabel: "Nombre",
     nombrePlaceholder: "Tu nombre",
     emailLabel: "Correo",
@@ -182,10 +182,10 @@ export const UI_COPY = {
     whatsappLabel: "WhatsApp",
     whatsappHelp: "Toca la bandera para elegir tu país.",
     submitCta: "Ver mi resultado",
-    submitting: "Preparando tu diagnóstico...",
+    submitting: "Preparando tu resultado...",
   },
   disclaimer:
-    "Este diagnóstico es una herramienta orientativa. No sustituye asesoría legal ni predice el resultado de ningún proceso migratorio.",
+    "Este simulador es una herramienta orientativa. No sustituye asesoría legal ni predice el resultado de ningún proceso migratorio.",
   errors: {
     generic: "No pudimos guardar tu respuesta. Intenta de nuevo en un momento.",
     invalidEmail: "Revisa tu correo — el formato no parece correcto.",
