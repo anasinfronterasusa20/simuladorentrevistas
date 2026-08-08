@@ -180,7 +180,7 @@ export const UI_COPY = {
     emailLabel: "Correo",
     emailPlaceholder: "tucorreo@ejemplo.com",
     whatsappLabel: "WhatsApp",
-    whatsappHelp: "Incluye el código de país (ej. +52, +1, +57).",
+    whatsappHelp: "Toca la bandera para elegir tu país.",
     submitCta: "Ver mi resultado",
     submitting: "Preparando tu diagnóstico...",
   },
