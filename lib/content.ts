@@ -163,7 +163,7 @@ export const BAND_COPY: Record<Band, BandCopy> = {
 // Copy transversal de la UI.
 export const UI_COPY = {
   intro: {
-    kicker: "Simulador: preparación para tu entrevista",
+    kicker: "Simulador para tu entrevista",
     titleLead: "Vamos a ver",
     titleAccent: "dónde estás parado hoy",
     accent:
