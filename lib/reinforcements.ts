@@ -50,9 +50,9 @@ const RULES: { applies: (a: Answers) => boolean; text: string }[] = [
     text: "Ganar seguridad para responder bajo presión",
   },
   {
-    // Q7 — acompañamiento sin confirmar.
-    applies: (a) => a.q7 <= 1,
-    text: "Definir quién te acompañará el día de tu entrevista",
+    // Q7 — no sabía que necesita intérprete.
+    applies: (a) => a.q7 === 0,
+    text: "Conseguir un intérprete para el día de tu entrevista",
   },
 ];
 

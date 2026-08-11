@@ -221,7 +221,15 @@ function QuestionStep({
         </span>
       </div>
 
-      <h2 className="headline headline--lg">{question.text}</h2>
+      {/* Umbral empírico: por encima de ~100 caracteres el titular en
+          Montserrat Black mayúsculas empieza a comerse el viewport móvil. */}
+      <h2
+        className={`headline headline--lg${
+          question.text.length > 100 ? " headline--dense" : ""
+        }`}
+      >
+        {question.text}
+      </h2>
 
       {question.type === "choice" ? (
         <ChoiceOptions

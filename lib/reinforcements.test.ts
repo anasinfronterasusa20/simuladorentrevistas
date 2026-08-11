@@ -70,12 +70,15 @@ describe("getReinforcements — reglas de mapeo", () => {
     );
   });
 
-  it("acompañamiento sin confirmar (q7<=1) activa su bullet", () => {
+  it("no sabía del intérprete (q7=0) activa el bullet de intérprete", () => {
     expect(getReinforcements({ ...perfect, q7: 0 })).toContain(
-      "Definir quién te acompañará el día de tu entrevista",
+      "Conseguir un intérprete para el día de tu entrevista",
     );
-    expect(getReinforcements({ ...perfect, q7: 1 })).toContain(
-      "Definir quién te acompañará el día de tu entrevista",
+  });
+
+  it("sí sabía del intérprete (q7=2) NO activa el bullet", () => {
+    expect(getReinforcements({ ...perfect, q7: 2 })).not.toContain(
+      "Conseguir un intérprete para el día de tu entrevista",
     );
   });
 });

@@ -294,6 +294,15 @@ a { color: inherit; text-decoration: none; }
 .headline--lg   { font-size: clamp(26px, 7vw, 34px);   line-height: 1.1; }
 .headline--md   { font-size: clamp(20px, 4.5vw, 26px); line-height: 1.15; }
 
+/* Preguntas largas: bajamos un escalón para que el titular no se coma la
+   pantalla en móvil. Se aplica por longitud del texto, no a mano, así una
+   edición de copy futura se auto-ajusta. */
+.headline--dense {
+  font-size: clamp(19px, 5vw, 27px);
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
 .headline__accent { color: var(--gold); }
 
 /* Título completo en gold (banda de resultado). Gana al selector de contexto

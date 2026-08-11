@@ -42,8 +42,8 @@ export const QUESTIONS: Question[] = [
     type: "choice",
     text: "¿En qué momento de tu proceso estás hoy?",
     options: [
-      { value: 2, label: "Ya tuve mi entrevista de miedo creíble y espero la del asilo" },
-      { value: 1, label: "Tengo fecha para la entrevista de asilo, pero aún no he tenido la de miedo creíble" },
+      { value: 2, label: "Ya tuve la entrevista ante USCIS y fui remitido a corte" },
+      { value: 1, label: "Tengo ya fecha asignada para mi entrevista de asilo" },
       { value: 0, label: "Todavía no tengo ninguna fecha confirmada" },
     ],
   },
@@ -52,9 +52,9 @@ export const QUESTIONS: Question[] = [
     type: "choice",
     text: "¿Cómo está tu documentación en este momento?",
     options: [
-      { value: 2, label: "Todo organizado, traducido y certificado" },
-      { value: 1, label: "Tengo los documentos, pero me falta traducirlos o certificarlos" },
-      { value: 0, label: "Apenas estoy juntando lo que tengo" },
+      { value: 2, label: "Todos los documentos actualizados, evidencias agregadas, organizadas y todo traducido" },
+      { value: 1, label: "Tengo los documentos pero no los tengo traducidos, ni sé cómo organizarlos para presentarlos" },
+      { value: 0, label: "Apenas estoy evaluando qué es lo que necesito" },
     ],
   },
   {
@@ -80,7 +80,7 @@ export const QUESTIONS: Question[] = [
   {
     id: "q5",
     type: "choice",
-    text: "¿Qué tan claras tienes las fechas clave de tu caso (cuándo entraste a EE.UU., cuándo presentaste tu I-589)?",
+    text: "¿Qué tan claras tienes las fechas de tu caso: fecha en la que te sucedieron los eventos de tu historia, fecha de la I-589, fecha de cuándo presentaste tu solicitud de asilo?",
     options: [
       { value: 2, label: "Las tengo todas claras y confirmadas" },
       { value: 1, label: "Algunas sí, otras no estoy segura/o" },
@@ -97,13 +97,14 @@ export const QUESTIONS: Question[] = [
     maxLabel: "Totalmente preparado",
   },
   {
+    // Pregunta de sí/no: usa los extremos de la escala ordinal (2 = sabía,
+    // 0 = no sabía) para no alterar el puntaje máximo ni los umbrales.
     id: "q7",
     type: "choice",
-    text: "El día de tu entrevista, ¿quién va a estar contigo?",
+    text: "¿Sabías que debes llevar un intérprete el día de tu entrevista?",
     options: [
-      { value: 2, label: "Ya sé exactamente quién me va a acompañar" },
-      { value: 1, label: "Tengo a alguien en mente, pero no lo hemos hablado todavía" },
-      { value: 0, label: "Todavía no sé quién podría acompañarme" },
+      { value: 2, label: "Sí" },
+      { value: 0, label: "No" },
     ],
   },
 ];
