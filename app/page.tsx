@@ -231,6 +231,8 @@ function QuestionStep({
         {question.text}
       </h2>
 
+      <p className="question-context">{question.context}</p>
+
       {question.type === "choice" ? (
         <ChoiceOptions
           question={question}

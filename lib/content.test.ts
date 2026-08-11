@@ -64,6 +64,34 @@ describe("QUESTIONS — estructura", () => {
     }
   });
 
+  it("todas las preguntas tienen contexto, y no queda larguísimo", () => {
+    for (const q of QUESTIONS) {
+      expect(q.context.trim().length, `${q.id} sin contexto`).toBeGreaterThan(0);
+      // Por encima de ~200 caracteres el bloque empuja las opciones fuera de
+      // la pantalla en móvil.
+      expect(q.context.length, `${q.id} tiene el contexto muy largo`)
+        .toBeLessThanOrEqual(200);
+    }
+  });
+
+  it("el contexto no da asesoría legal ni promete resultados", () => {
+    const forbidden = [
+      /\bdebes\s+(presentar|argumentar|alegar)\b/i,
+      /\bte recomendamos\b/i,
+      /\btu caso\s+(ser[aá]|va a)\b/i,
+      /garantiz/i,
+      /probabilidad/i,
+      /\ben riesgo\b/i,
+      /deportaci[oó]n/i,
+      /%/,
+    ];
+    for (const q of QUESTIONS) {
+      for (const re of forbidden) {
+        expect(q.context, `${q.id}: "${q.context}"`).not.toMatch(re);
+      }
+    }
+  });
+
   it("el puntaje máximo alcanzable coincide con MAX_SCORE", () => {
     // 2 puntos por pregunta. Si se agrega o quita una, este test falla y
     // obliga a recalibrar MAX_SCORE y THRESHOLDS a la vez.

@@ -17,11 +17,19 @@ export const CONSENT_COPY =
 // Preguntas — orden y texto fijos por instrucción del cliente.
 // ---------------------------------------------------------------------------
 
+// `context`: una o dos líneas debajo de la pregunta que explican por qué
+// importa. En las preguntas no obvias hace doble trabajo — da contexto y
+// enseña algo que la persona quizá no sabía.
+//
+// COMPLIANCE: es texto informativo, no asesoría legal. Nada de plazos
+// aplicados al caso de la persona, promesas de resultado, ni urgencia.
+
 export type ChoiceQuestion = {
   id: "q1" | "q2" | "q3" | "q4" | "q5" | "q7"
     | "q8" | "q9" | "q10" | "q11" | "q12";
   type: "choice";
   text: string;
+  context: string;
   options: { value: ChoiceAnswer; label: string }[];
 };
 
@@ -29,6 +37,7 @@ export type ScaleQuestion = {
   id: "q6";
   type: "scale";
   text: string;
+  context: string;
   min: 1;
   max: 10;
   minLabel: string;
@@ -42,6 +51,8 @@ export const QUESTIONS: Question[] = [
     id: "q1",
     type: "choice",
     text: "¿En qué momento de tu proceso estás hoy?",
+    context:
+      "Saber en qué etapa estás define qué se puede trabajar todavía y con cuánto tiempo cuentas.",
     options: [
       { value: 2, label: "Ya tuve la entrevista ante USCIS y fui remitido a corte" },
       { value: 1, label: "Tengo ya fecha asignada para mi entrevista de asilo" },
@@ -53,6 +64,8 @@ export const QUESTIONS: Question[] = [
     id: "q8",
     type: "choice",
     text: "¿Presentaste tu solicitud de asilo dentro del primer año de haber llegado a EE.UU.?",
+    context:
+      "Existe un plazo de un año desde la llegada para presentar la solicitud. Hay excepciones reconocidas, pero no se aplican solas: hay que plantearlas de forma explícita.",
     options: [
       { value: 2, label: "Sí, la presenté dentro del primer año" },
       { value: 1, label: "La presenté después del año, y tengo argumentada una excepción" },
@@ -63,6 +76,8 @@ export const QUESTIONS: Question[] = [
     id: "q2",
     type: "choice",
     text: "¿Cómo está tu documentación en este momento?",
+    context:
+      "Tenerlos no es lo mismo que tenerlos listos. Un documento sin traducir o que nadie puede ubicar dentro del expediente no termina sumando.",
     options: [
       { value: 2, label: "Todos los documentos actualizados, evidencias agregadas, organizadas y todo traducido" },
       { value: 1, label: "Tengo los documentos pero no los tengo traducidos, ni sé cómo organizarlos para presentarlos" },
@@ -74,6 +89,8 @@ export const QUESTIONS: Question[] = [
     id: "q10",
     type: "choice",
     text: "Además de tus documentos personales, ¿tienes evidencia sobre lo que está pasando hoy en tu país?",
+    context:
+      "Son dos pruebas distintas: tus documentos prueban tu historia, y la evidencia de país prueba el contexto en el que esa historia ocurrió. Una sola de las dos deja el caso a medias.",
     options: [
       { value: 2, label: "Sí, tengo un expediente de condiciones de país actualizado" },
       { value: 1, label: "Tengo algunas noticias o artículos sueltos que guardé" },
@@ -87,6 +104,8 @@ export const QUESTIONS: Question[] = [
     id: "q9",
     type: "choice",
     text: "Tu declaración personal, ¿cita tus evidencias párrafo por párrafo?",
+    context:
+      "Cada evidencia debería estar citada en el párrafo de tu declaración al que corresponde. Si no se cita, nadie va a hacer esa conexión por ti.",
     options: [
       { value: 2, label: "Sí, cada evidencia está citada en el párrafo que le corresponde" },
       { value: 1, label: "Tengo las dos cosas, pero por separado, sin conectarlas entre sí" },
@@ -97,6 +116,8 @@ export const QUESTIONS: Question[] = [
     id: "q3",
     type: "choice",
     text: "¿Cuándo fue la última vez que actualizaste tu carpeta de documentos y evidencias?",
+    context:
+      "Un expediente que lleva meses sin tocarse suele quedarse corto frente a todo lo que siguió pasando después.",
     options: [
       { value: 2, label: "La actualicé hace poco (menos de un mes)" },
       { value: 1, label: "Tiene varios meses sin que le agregue nada" },
@@ -107,6 +128,8 @@ export const QUESTIONS: Question[] = [
     id: "q4",
     type: "choice",
     text: "Cuando piensas en contar tu historia, ¿cómo te sientes?",
+    context:
+      "Tenerla en la cabeza y decirla en voz alta son dos cosas distintas. La primera vez que la digas completa no debería ser el día de la entrevista.",
     options: [
       { value: 2, label: "La he contado en voz alta varias veces, con calma" },
       { value: 1, label: "La tengo clara en mi cabeza, pero nunca la he dicho en voz alta" },
@@ -118,6 +141,8 @@ export const QUESTIONS: Question[] = [
     id: "q11",
     type: "choice",
     text: "Si alguien comparara hoy tu declaración con tu I-589, ¿coincidirían?",
+    context:
+      "Las diferencias casi nunca están en lo grande: aparecen en fechas, nombres o en el orden en que ocurrieron los hechos.",
     options: [
       { value: 2, label: "Sí, las comparé y coinciden" },
       { value: 1, label: "Creo que sí, pero nunca las he comparado una al lado de la otra" },
@@ -128,6 +153,8 @@ export const QUESTIONS: Question[] = [
     id: "q5",
     type: "choice",
     text: "¿Qué tan claras tienes las fechas de tu caso: fecha en la que te sucedieron los eventos de tu historia, fecha de la I-589, fecha de cuándo presentaste tu solicitud de asilo?",
+    context:
+      "Las fechas están entre lo primero que se revisa. Tenerlas confirmadas evita contradecirte sin querer.",
     options: [
       { value: 2, label: "Las tengo todas claras y confirmadas" },
       { value: 1, label: "Algunas sí, otras no estoy segura/o" },
@@ -139,6 +166,8 @@ export const QUESTIONS: Question[] = [
     id: "q12",
     type: "choice",
     text: "Desde que presentaste tu solicitud, ¿ha cambiado algo importante (dirección, estado civil, familiares, nuevos hechos)?",
+    context:
+      "Mudanzas, matrimonios, hijos, hechos nuevos en tu país. Varios de estos cambios deben informarse cuando ocurren, no al final.",
     options: [
       { value: 2, label: "No ha cambiado nada, o lo que cambió ya lo reporté" },
       { value: 1, label: "Sí cambió algo, pero no sé si había que reportarlo" },
@@ -149,6 +178,8 @@ export const QUESTIONS: Question[] = [
     id: "q6",
     type: "scale",
     text: "Del 1 al 10, ¿qué tan preparado te sientes hoy para responder preguntas difíciles sin bloquearte?",
+    context:
+      "Aquí no hay respuesta correcta. Nos sirve más saber cómo te sientes hoy que cómo crees que deberías sentirte.",
     min: 1,
     max: 10,
     minLabel: "Nada preparado",
@@ -160,6 +191,8 @@ export const QUESTIONS: Question[] = [
     id: "q7",
     type: "choice",
     text: "¿Sabías que debes llevar un intérprete el día de tu entrevista?",
+    context:
+      "En la entrevista de asilo ante USCIS, normalmente te corresponde a ti llevar tu propio intérprete si no vas a declarar en inglés.",
     options: [
       { value: 2, label: "Sí" },
       { value: 0, label: "No" },
