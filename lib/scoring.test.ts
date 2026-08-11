@@ -1,23 +1,28 @@
 import { describe, it, expect } from "vitest";
 import {
   Answers,
+  CHOICE_KEYS,
   calculateScore,
   grade,
   normalizeScale,
   scoreToBand,
   validateAnswers,
   MAX_SCORE,
+  THRESHOLDS,
+  type ChoiceAnswer,
+  type ScaleAnswer,
 } from "./scoring";
 
-const bestCase: Answers = {
-  q1: 2, q2: 2, q3: 2, q4: 2, q5: 2, q6: 10, q7: 2,
-};
-const worstCase: Answers = {
-  q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0,
-};
-const middleCase: Answers = {
-  q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 6, q7: 1,
-};
+// Construye un set de respuestas con el mismo valor en todas las de opción.
+function uniform(choice: ChoiceAnswer, scale: ScaleAnswer): Answers {
+  const a = { q6: scale } as Answers;
+  for (const k of CHOICE_KEYS) a[k] = choice;
+  return a;
+}
+
+const bestCase = uniform(2, 10);
+const worstCase = uniform(0, 1);
+const middleCase = uniform(1, 6);
 
 describe("normalizeScale (Q6 1-10 → 0-2)", () => {
   it("mapea 8, 9, 10 a 2 (más preparado)", () => {
@@ -39,62 +44,70 @@ describe("normalizeScale (Q6 1-10 → 0-2)", () => {
 describe("calculateScore", () => {
   it("da el máximo con todas las mejores respuestas", () => {
     expect(calculateScore(bestCase)).toBe(MAX_SCORE);
-    expect(MAX_SCORE).toBe(14);
+    expect(MAX_SCORE).toBe(24);
   });
   it("da cero con todas las peores respuestas", () => {
     expect(calculateScore(worstCase)).toBe(0);
   });
-  it("da 7 con todas las respuestas del medio", () => {
-    expect(calculateScore(middleCase)).toBe(7);
+  it("da 12 con todas las respuestas del medio", () => {
+    // 11 opciones × 1 punto + escala 6 → 1 punto.
+    expect(calculateScore(middleCase)).toBe(12);
+  });
+  it("MAX_SCORE equivale a 2 puntos por cada una de las 12 preguntas", () => {
+    expect(MAX_SCORE).toBe((CHOICE_KEYS.length + 1) * 2);
   });
 });
 
 describe("scoreToBand", () => {
-  it("11-14 → alto", () => {
-    expect(scoreToBand(11)).toBe("alto");
-    expect(scoreToBand(14)).toBe("alto");
+  it("19-24 → alto", () => {
+    expect(scoreToBand(19)).toBe("alto");
+    expect(scoreToBand(24)).toBe("alto");
   });
-  it("6-10 → intermedio", () => {
-    expect(scoreToBand(6)).toBe("intermedio");
+  it("10-18 → intermedio", () => {
     expect(scoreToBand(10)).toBe("intermedio");
+    expect(scoreToBand(18)).toBe("intermedio");
   });
-  it("0-5 → por_reforzar", () => {
+  it("0-9 → por_reforzar", () => {
     expect(scoreToBand(0)).toBe("por_reforzar");
-    expect(scoreToBand(5)).toBe("por_reforzar");
+    expect(scoreToBand(9)).toBe("por_reforzar");
   });
-  it("bordes exactos", () => {
-    expect(scoreToBand(10)).toBe("intermedio");
-    expect(scoreToBand(11)).toBe("alto");
-    expect(scoreToBand(5)).toBe("por_reforzar");
-    expect(scoreToBand(6)).toBe("intermedio");
+  it("bordes exactos alrededor de los umbrales", () => {
+    expect(scoreToBand(THRESHOLDS.alto - 1)).toBe("intermedio");
+    expect(scoreToBand(THRESHOLDS.alto)).toBe("alto");
+    expect(scoreToBand(THRESHOLDS.intermedio - 1)).toBe("por_reforzar");
+    expect(scoreToBand(THRESHOLDS.intermedio)).toBe("intermedio");
   });
 });
 
 describe("grade (end-to-end)", () => {
   it("caso mejor → alto", () => {
-    expect(grade(bestCase).band).toBe("alto");
+    expect(grade(bestCase)).toEqual({ band: "alto", score: 24 });
   });
   it("caso peor → por_reforzar", () => {
-    expect(grade(worstCase).band).toBe("por_reforzar");
+    expect(grade(worstCase)).toEqual({ band: "por_reforzar", score: 0 });
   });
   it("caso medio → intermedio", () => {
-    expect(grade(middleCase).band).toBe("intermedio");
+    expect(grade(middleCase)).toEqual({ band: "intermedio", score: 12 });
   });
 
-  it("caso mixto realista: docs OK pero narrativa débil → intermedio", () => {
-    const mixed: Answers = {
-      q1: 2, q2: 2, q3: 1, q4: 0, q5: 1, q6: 5, q7: 1,
+  it("fuerte en logística pero flojo en las debilidades típicas → intermedio", () => {
+    // Documentación y fechas en orden, pero sin amarre, sin contexto de país
+    // y con posible inconsistencia: el perfil que la presentación describe
+    // como el más común.
+    const a: Answers = {
+      ...bestCase,
+      q9: 0,   // no conectó evidencias con la declaración
+      q10: 0,  // sin contexto de país
+      q11: 1,  // nunca comparó declaración con I-589
+      q12: 1,  // cambios sin reportar con certeza
     };
-    // 2+2+1+0+1+1+1 = 8
-    expect(grade(mixed)).toEqual({ band: "intermedio", score: 8 });
+    // 24 - 2 - 2 - 1 - 1 = 18
+    expect(grade(a)).toEqual({ band: "intermedio", score: 18 });
   });
 
-  it("caso mixto realista: muy preparado con un solo hueco → alto", () => {
-    const mixed: Answers = {
-      q1: 2, q2: 2, q3: 2, q4: 2, q5: 2, q6: 6, q7: 0,
-    };
-    // 2+2+2+2+2+1+0 = 11
-    expect(grade(mixed)).toEqual({ band: "alto", score: 11 });
+  it("un solo hueco sobre un caso fuerte se mantiene en alto", () => {
+    const a: Answers = { ...bestCase, q7: 0 };
+    expect(grade(a)).toEqual({ band: "alto", score: 22 });
   });
 });
 
@@ -109,10 +122,17 @@ describe("validateAnswers", () => {
     expect(validateAnswers("string")).toBe("invalid_payload");
     expect(validateAnswers(42)).toBe("invalid_payload");
   });
-  it("rechaza opción fuera de rango en Q1-Q5, Q7", () => {
+  it("exige que estén TODAS las preguntas de opción", () => {
+    for (const k of CHOICE_KEYS) {
+      const incomplete = { ...bestCase } as Record<string, unknown>;
+      delete incomplete[k];
+      expect(validateAnswers(incomplete)).toBe(`invalid_${k}`);
+    }
+  });
+  it("rechaza opción fuera de rango", () => {
     expect(validateAnswers({ ...bestCase, q1: 3 })).toBe("invalid_q1");
-    expect(validateAnswers({ ...bestCase, q7: -1 })).toBe("invalid_q7");
-    expect(validateAnswers({ ...bestCase, q3: "2" })).toBe("invalid_q3");
+    expect(validateAnswers({ ...bestCase, q9: -1 })).toBe("invalid_q9");
+    expect(validateAnswers({ ...bestCase, q12: "2" })).toBe("invalid_q12");
   });
   it("rechaza Q6 fuera de 1-10", () => {
     expect(validateAnswers({ ...bestCase, q6: 0 })).toBe("invalid_q6");
@@ -122,12 +142,10 @@ describe("validateAnswers", () => {
   });
 });
 
-describe("compliance guard (score numérico permanece interno)", () => {
-  it("grade() nunca devuelve texto que contenga porcentajes o promesas", () => {
-    const cases = [bestCase, worstCase, middleCase];
-    for (const c of cases) {
-      const result = grade(c);
-      const serialized = JSON.stringify(result);
+describe("compliance (score numérico permanece interno)", () => {
+  it("grade() nunca devuelve texto con porcentajes ni promesas", () => {
+    for (const c of [bestCase, worstCase, middleCase]) {
+      const serialized = JSON.stringify(grade(c));
       expect(serialized).not.toMatch(/probabilidad/i);
       expect(serialized).not.toMatch(/%/);
       expect(serialized).not.toMatch(/garant/i);
@@ -135,9 +153,8 @@ describe("compliance guard (score numérico permanece interno)", () => {
     }
   });
   it("la banda es siempre uno de los 3 valores permitidos", () => {
-    const cases = [bestCase, worstCase, middleCase];
-    for (const c of cases) {
-      expect(["alto", "intermedio", "por_reforzar"]).toContain(grade(c).band);
+    for (let s = 0; s <= MAX_SCORE; s++) {
+      expect(["alto", "intermedio", "por_reforzar"]).toContain(scoreToBand(s));
     }
   });
 });

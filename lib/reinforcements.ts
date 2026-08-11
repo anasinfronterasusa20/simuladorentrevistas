@@ -18,7 +18,36 @@ export const FALLBACK_BULLET =
   "Repasar los detalles finos de tu relato antes de la cita";
 
 // Orden = prioridad. Se toman los primeros MAX_BULLETS que apliquen.
+//
+// Las primeras cinco reglas corresponden a las "debilidades típicas" de la
+// presentación de ventas: son las brechas de mayor consecuencia, así que
+// desplazan a las de logística cuando ambas aplican.
 const RULES: { applies: (a: Answers) => boolean; text: string }[] = [
+  {
+    // Q8 — presentó fuera del año sin excepción argumentada.
+    applies: (a) => a.q8 === 0,
+    text: "Revisar si te aplica una excepción al plazo del primer año",
+  },
+  {
+    // Q9 — la declaración no cita las evidencias (el amarre).
+    applies: (a) => a.q9 <= 1,
+    text: "Conectar cada evidencia con el párrafo de tu declaración",
+  },
+  {
+    // Q10 — sin expediente de condiciones de país.
+    applies: (a) => a.q10 <= 1,
+    text: "Sumar evidencia de contexto sobre lo que ocurre en tu país",
+  },
+  {
+    // Q11 — posible inconsistencia entre declaración e I-589.
+    applies: (a) => a.q11 <= 1,
+    text: "Cotejar tu declaración con tu I-589 línea por línea",
+  },
+  {
+    // Q12 — cambios sin reportar desde la solicitud.
+    applies: (a) => a.q12 <= 1,
+    text: "Reportar los cambios ocurridos desde que presentaste tu caso",
+  },
   {
     // Q2 — documentación incompleta o sin traducir/certificar.
     applies: (a) => a.q2 <= 1,

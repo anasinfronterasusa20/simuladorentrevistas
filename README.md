@@ -27,6 +27,16 @@ Ambas van en `Project Settings → API` del dashboard de Supabase.
 
 En el dashboard de Supabase → SQL Editor → pega y ejecuta [`supabase/schema.sql`](supabase/schema.sql). Crea la tabla `public.diagnostics` con RLS anon-INSERT-only.
 
+## Supabase — migraciones
+
+Los cambios de esquema posteriores a la creación de la tabla viven en [`supabase/migrations/`](supabase/migrations/), numerados. Se corren en orden, en el SQL Editor, y son idempotentes.
+
+| Migración | Qué hace | Obligatoria antes de |
+|---|---|---|
+| `001_expand_score_range_to_24.sql` | Amplía `score_interno` de 0-14 a 0-24 | Desplegar el set de 12 preguntas |
+
+**Orden correcto: primero la migración, después el deploy.** Ampliar el rango es compatible hacia atrás (los puntajes viejos de 0-14 siguen siendo válidos), así que se puede correr con la versión anterior todavía en producción. Al revés no: si el código de 12 preguntas llega antes que la migración, toda persona que supere 14 puntos recibe un error al guardar y su registro se pierde.
+
 ## Tests
 
 ```bash

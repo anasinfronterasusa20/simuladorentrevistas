@@ -18,7 +18,8 @@ export const CONSENT_COPY =
 // ---------------------------------------------------------------------------
 
 export type ChoiceQuestion = {
-  id: "q1" | "q2" | "q3" | "q4" | "q5" | "q7";
+  id: "q1" | "q2" | "q3" | "q4" | "q5" | "q7"
+    | "q8" | "q9" | "q10" | "q11" | "q12";
   type: "choice";
   text: string;
   options: { value: ChoiceAnswer; label: string }[];
@@ -48,6 +49,17 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
+    // Debilidad típica: "El año vencido sin excepción argumentada".
+    id: "q8",
+    type: "choice",
+    text: "¿Presentaste tu solicitud de asilo dentro del primer año de haber llegado a EE.UU.?",
+    options: [
+      { value: 2, label: "Sí, la presenté dentro del primer año" },
+      { value: 1, label: "La presenté después del año, y tengo argumentada una excepción" },
+      { value: 0, label: "La presenté después del año, y no sé si me aplica alguna excepción" },
+    ],
+  },
+  {
     id: "q2",
     type: "choice",
     text: "¿Cómo está tu documentación en este momento?",
@@ -55,6 +67,30 @@ export const QUESTIONS: Question[] = [
       { value: 2, label: "Todos los documentos actualizados, evidencias agregadas, organizadas y todo traducido" },
       { value: 1, label: "Tengo los documentos pero no los tengo traducidos, ni sé cómo organizarlos para presentarlos" },
       { value: 0, label: "Apenas estoy evaluando qué es lo que necesito" },
+    ],
+  },
+  {
+    // Debilidad típica: "Solo evidencia personal, sin contexto de país".
+    id: "q10",
+    type: "choice",
+    text: "Además de tus documentos personales, ¿tienes evidencia sobre lo que está pasando hoy en tu país?",
+    options: [
+      { value: 2, label: "Sí, tengo un expediente de condiciones de país actualizado" },
+      { value: 1, label: "Tengo algunas noticias o artículos sueltos que guardé" },
+      { value: 0, label: "Solo tengo mis documentos personales" },
+    ],
+  },
+  {
+    // Debilidad típica: "Nada que amarre tu historia con lo que pasa hoy".
+    // Es el punto que la presentación marca como LO MÁS IMPORTANTE:
+    // si un exhibit no se cita en la declaración, nadie lo conecta.
+    id: "q9",
+    type: "choice",
+    text: "Tu declaración personal, ¿cita tus evidencias párrafo por párrafo?",
+    options: [
+      { value: 2, label: "Sí, cada evidencia está citada en el párrafo que le corresponde" },
+      { value: 1, label: "Tengo las dos cosas, pero por separado, sin conectarlas entre sí" },
+      { value: 0, label: "No sabía que había que conectarlas" },
     ],
   },
   {
@@ -78,6 +114,17 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
+    // Debilidad típica: "Fechas que no cuadran entre declaración e I-589".
+    id: "q11",
+    type: "choice",
+    text: "Si alguien comparara hoy tu declaración con tu I-589, ¿coincidirían?",
+    options: [
+      { value: 2, label: "Sí, las comparé y coinciden" },
+      { value: 1, label: "Creo que sí, pero nunca las he comparado una al lado de la otra" },
+      { value: 0, label: "Es probable que haya diferencias entre las dos" },
+    ],
+  },
+  {
     id: "q5",
     type: "choice",
     text: "¿Qué tan claras tienes las fechas de tu caso: fecha en la que te sucedieron los eventos de tu historia, fecha de la I-589, fecha de cuándo presentaste tu solicitud de asilo?",
@@ -85,6 +132,17 @@ export const QUESTIONS: Question[] = [
       { value: 2, label: "Las tengo todas claras y confirmadas" },
       { value: 1, label: "Algunas sí, otras no estoy segura/o" },
       { value: 0, label: "La verdad, no las tengo claras" },
+    ],
+  },
+  {
+    // Debilidad típica: "Cambios nunca reportados".
+    id: "q12",
+    type: "choice",
+    text: "Desde que presentaste tu solicitud, ¿ha cambiado algo importante (dirección, estado civil, familiares, nuevos hechos)?",
+    options: [
+      { value: 2, label: "No ha cambiado nada, o lo que cambió ya lo reporté" },
+      { value: 1, label: "Sí cambió algo, pero no sé si había que reportarlo" },
+      { value: 0, label: "Sí cambió algo y no lo he reportado" },
     ],
   },
   {

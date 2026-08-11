@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QUESTIONS } from "./content";
-import { MAX_SCORE, THRESHOLDS } from "./scoring";
+import { CHOICE_KEYS, MAX_SCORE, THRESHOLDS } from "./scoring";
 
 // Guardas estructurales sobre el set de preguntas.
 //
@@ -9,11 +9,15 @@ import { MAX_SCORE, THRESHOLDS } from "./scoring";
 // de copy rompe la coherencia del scoring.
 
 describe("QUESTIONS — estructura", () => {
-  it("tiene exactamente 7 preguntas, en orden q1..q7", () => {
-    expect(QUESTIONS).toHaveLength(7);
-    expect(QUESTIONS.map((q) => q.id)).toEqual([
-      "q1", "q2", "q3", "q4", "q5", "q6", "q7",
-    ]);
+  it("cubre exactamente las 12 claves del modelo de respuestas", () => {
+    // El ORDEN del array es el orden de presentación, que no tiene por qué
+    // coincidir con el de los ids: q8..q12 se agregaron después pero se
+    // muestran intercaladas. Lo que sí debe cumplirse es que el set de ids
+    // sea exactamente el que espera el scoring, sin faltantes ni sobrantes.
+    const ids = QUESTIONS.map((q) => q.id);
+    expect(ids).toHaveLength(12);
+    expect(new Set(ids).size, "hay ids duplicados").toBe(12);
+    expect(new Set(ids)).toEqual(new Set([...CHOICE_KEYS, "q6"]));
   });
 
   it("solo q6 es escala; el resto son de opciones", () => {
@@ -61,8 +65,8 @@ describe("QUESTIONS — estructura", () => {
   });
 
   it("el puntaje máximo alcanzable coincide con MAX_SCORE", () => {
-    // 7 preguntas × 2 puntos. Si se agrega o quita una pregunta, este test
-    // falla y obliga a recalibrar MAX_SCORE y THRESHOLDS a la vez.
+    // 2 puntos por pregunta. Si se agrega o quita una, este test falla y
+    // obliga a recalibrar MAX_SCORE y THRESHOLDS a la vez.
     expect(QUESTIONS.length * 2).toBe(MAX_SCORE);
     expect(THRESHOLDS.alto).toBeLessThanOrEqual(MAX_SCORE);
     expect(THRESHOLDS.intermedio).toBeLessThan(THRESHOLDS.alto);

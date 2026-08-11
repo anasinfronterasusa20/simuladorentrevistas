@@ -5,113 +5,173 @@ import {
   MAX_BULLETS,
 } from "./reinforcements";
 import { BAND_COPY, RESULT_COPY, UI_COPY } from "./content";
-import { grade, type Answers } from "./scoring";
+import {
+  CHOICE_KEYS,
+  grade,
+  type Answers,
+  type ChoiceAnswer,
+  type ScaleAnswer,
+} from "./scoring";
 
-const perfect: Answers = { q1: 2, q2: 2, q3: 2, q4: 2, q5: 2, q6: 10, q7: 2 };
-const worst: Answers = { q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 1, q7: 0 };
+function uniform(choice: ChoiceAnswer, scale: ScaleAnswer): Answers {
+  const a = { q6: scale } as Answers;
+  for (const k of CHOICE_KEYS) a[k] = choice;
+  return a;
+}
 
-describe("getReinforcements — reglas de mapeo", () => {
-  it("documentación incompleta (q2=0) activa el bullet de documentación", () => {
-    const r = getReinforcements({ ...perfect, q2: 0 });
-    expect(r).toContain("Completar y certificar tu documentación");
+const perfect = uniform(2, 10);
+const worst = uniform(0, 1);
+
+const BULLETS = {
+  plazo: "Revisar si te aplica una excepción al plazo del primer año",
+  amarre: "Conectar cada evidencia con el párrafo de tu declaración",
+  contexto: "Sumar evidencia de contexto sobre lo que ocurre en tu país",
+  cotejo: "Cotejar tu declaración con tu I-589 línea por línea",
+  cambios: "Reportar los cambios ocurridos desde que presentaste tu caso",
+  documentacion: "Completar y certificar tu documentación",
+  fechas: "Fijar con precisión las fechas clave de tu caso",
+  bloqueo: "Trabajar cómo contar tu historia sin bloquearte",
+  vozAlta: "Practicar tu relato en voz alta antes de la entrevista",
+  carpeta: "Actualizar tu carpeta de documentos y evidencias",
+  presion: "Ganar seguridad para responder bajo presión",
+  interprete: "Conseguir un intérprete para el día de tu entrevista",
+} as const;
+
+describe("getReinforcements — debilidades típicas (prioridad alta)", () => {
+  it("fuera del plazo sin excepción (q8=0) activa el bullet del año", () => {
+    expect(getReinforcements({ ...perfect, q8: 0 })).toContain(BULLETS.plazo);
+  });
+  it("con excepción argumentada (q8=1) NO lo activa", () => {
+    expect(getReinforcements({ ...perfect, q8: 1 })).not.toContain(
+      BULLETS.plazo,
+    );
   });
 
-  it("documentación sin traducir (q2=1) también lo activa", () => {
-    const r = getReinforcements({ ...perfect, q2: 1 });
-    expect(r).toContain("Completar y certificar tu documentación");
+  it("evidencias sin citar (q9<=1) activa el bullet del amarre", () => {
+    expect(getReinforcements({ ...perfect, q9: 0 })).toContain(BULLETS.amarre);
+    expect(getReinforcements({ ...perfect, q9: 1 })).toContain(BULLETS.amarre);
+  });
+
+  it("sin contexto de país (q10<=1) activa su bullet", () => {
+    expect(getReinforcements({ ...perfect, q10: 0 })).toContain(
+      BULLETS.contexto,
+    );
+    expect(getReinforcements({ ...perfect, q10: 1 })).toContain(
+      BULLETS.contexto,
+    );
+  });
+
+  it("declaración sin cotejar contra la I-589 (q11<=1) activa su bullet", () => {
+    expect(getReinforcements({ ...perfect, q11: 0 })).toContain(BULLETS.cotejo);
+    expect(getReinforcements({ ...perfect, q11: 1 })).toContain(BULLETS.cotejo);
+  });
+
+  it("cambios sin reportar (q12<=1) activa su bullet", () => {
+    expect(getReinforcements({ ...perfect, q12: 0 })).toContain(
+      BULLETS.cambios,
+    );
+    expect(getReinforcements({ ...perfect, q12: 1 })).toContain(
+      BULLETS.cambios,
+    );
+  });
+});
+
+describe("getReinforcements — reglas de logística", () => {
+  it("documentación incompleta (q2<=1) activa su bullet", () => {
+    expect(getReinforcements({ ...perfect, q2: 0 })).toContain(
+      BULLETS.documentacion,
+    );
+    expect(getReinforcements({ ...perfect, q2: 1 })).toContain(
+      BULLETS.documentacion,
+    );
   });
 
   it("fechas inciertas (q5<=1) activa el bullet de fechas", () => {
-    expect(getReinforcements({ ...perfect, q5: 0 })).toContain(
-      "Fijar con precisión las fechas clave de tu caso",
-    );
-    expect(getReinforcements({ ...perfect, q5: 1 })).toContain(
-      "Fijar con precisión las fechas clave de tu caso",
-    );
+    expect(getReinforcements({ ...perfect, q5: 0 })).toContain(BULLETS.fechas);
+    expect(getReinforcements({ ...perfect, q5: 1 })).toContain(BULLETS.fechas);
   });
 
   it("q4=0 activa 'sin bloquearte', no 'en voz alta'", () => {
     const r = getReinforcements({ ...perfect, q4: 0 });
-    expect(r).toContain("Trabajar cómo contar tu historia sin bloquearte");
-    expect(r).not.toContain(
-      "Practicar tu relato en voz alta antes de la entrevista",
-    );
+    expect(r).toContain(BULLETS.bloqueo);
+    expect(r).not.toContain(BULLETS.vozAlta);
   });
 
   it("q4=1 activa 'en voz alta', no 'sin bloquearte'", () => {
     const r = getReinforcements({ ...perfect, q4: 1 });
-    expect(r).toContain(
-      "Practicar tu relato en voz alta antes de la entrevista",
-    );
-    expect(r).not.toContain("Trabajar cómo contar tu historia sin bloquearte");
+    expect(r).toContain(BULLETS.vozAlta);
+    expect(r).not.toContain(BULLETS.bloqueo);
   });
 
   it("carpeta desactualizada (q3<=1) activa el bullet de expediente", () => {
-    expect(getReinforcements({ ...perfect, q3: 0 })).toContain(
-      "Actualizar tu carpeta de documentos y evidencias",
-    );
-    expect(getReinforcements({ ...perfect, q3: 1 })).toContain(
-      "Actualizar tu carpeta de documentos y evidencias",
-    );
+    expect(getReinforcements({ ...perfect, q3: 0 })).toContain(BULLETS.carpeta);
+    expect(getReinforcements({ ...perfect, q3: 1 })).toContain(BULLETS.carpeta);
   });
 
   it("escala <= 5 activa el bullet de seguridad bajo presión", () => {
-    expect(getReinforcements({ ...perfect, q6: 5 })).toContain(
-      "Ganar seguridad para responder bajo presión",
-    );
-    expect(getReinforcements({ ...perfect, q6: 1 })).toContain(
-      "Ganar seguridad para responder bajo presión",
-    );
+    expect(getReinforcements({ ...perfect, q6: 5 })).toContain(BULLETS.presion);
+    expect(getReinforcements({ ...perfect, q6: 1 })).toContain(BULLETS.presion);
   });
 
   it("escala >= 6 NO activa el bullet de seguridad", () => {
     expect(getReinforcements({ ...perfect, q6: 6 })).not.toContain(
-      "Ganar seguridad para responder bajo presión",
+      BULLETS.presion,
     );
   });
 
   it("no sabía del intérprete (q7=0) activa el bullet de intérprete", () => {
     expect(getReinforcements({ ...perfect, q7: 0 })).toContain(
-      "Conseguir un intérprete para el día de tu entrevista",
+      BULLETS.interprete,
     );
   });
 
   it("sí sabía del intérprete (q7=2) NO activa el bullet", () => {
     expect(getReinforcements({ ...perfect, q7: 2 })).not.toContain(
-      "Conseguir un intérprete para el día de tu entrevista",
+      BULLETS.interprete,
     );
   });
 });
 
-describe("getReinforcements — límite y fallback", () => {
+describe("getReinforcements — límite, prioridad y fallback", () => {
   it("nunca devuelve más de MAX_BULLETS", () => {
     expect(getReinforcements(worst).length).toBeLessThanOrEqual(MAX_BULLETS);
     expect(MAX_BULLETS).toBe(3);
   });
 
-  it("respeta el orden de prioridad cuando todo aplica", () => {
+  it("cuando todo aplica, priorizan las debilidades típicas", () => {
     expect(getReinforcements(worst)).toEqual([
-      "Completar y certificar tu documentación",
-      "Fijar con precisión las fechas clave de tu caso",
-      "Trabajar cómo contar tu historia sin bloquearte",
+      BULLETS.plazo,
+      BULLETS.amarre,
+      BULLETS.contexto,
+    ]);
+  });
+
+  it("las de logística aparecen solo si no hay debilidades típicas", () => {
+    const soloLogistica: Answers = {
+      ...perfect,
+      q2: 0, q5: 0, q3: 0,
+    };
+    expect(getReinforcements(soloLogistica)).toEqual([
+      BULLETS.documentacion,
+      BULLETS.fechas,
+      BULLETS.carpeta,
     ]);
   });
 
   it("usa el fallback cuando nada aplica (solo alcanzable en banda Alto)", () => {
-    const r = getReinforcements(perfect);
-    expect(r).toEqual([FALLBACK_BULLET]);
+    expect(getReinforcements(perfect)).toEqual([FALLBACK_BULLET]);
     expect(grade(perfect).band).toBe("alto");
   });
 
   it("nunca devuelve una lista vacía, para cualquier combinación", () => {
     const values = [0, 1, 2] as const;
-    for (const q2 of values)
-      for (const q3 of values)
-        for (const q4 of values)
-          for (const q5 of values)
-            for (const q7 of values) {
+    for (const q9 of values)
+      for (const q10 of values)
+        for (const q11 of values)
+          for (const q12 of values)
+            for (const q2 of values) {
               const r = getReinforcements({
-                q1: 2, q2, q3, q4, q5, q6: 10, q7,
+                ...perfect, q2, q9, q10, q11, q12,
               });
               expect(r.length).toBeGreaterThan(0);
               expect(r.length).toBeLessThanOrEqual(MAX_BULLETS);
@@ -123,7 +183,6 @@ describe("getReinforcements — límite y fallback", () => {
 // Compliance: barrido sobre TODO el copy visible al usuario.
 // ---------------------------------------------------------------------------
 
-// Reúne cada string que puede terminar en pantalla.
 function allUserFacingCopy(): string[] {
   const strings: string[] = [];
 
@@ -148,17 +207,8 @@ function allUserFacingCopy(): string[] {
     UI_COPY.disclaimer,
   );
 
-  // Todos los bullets posibles, activados por fuerza bruta.
-  const values = [0, 1, 2] as const;
-  for (const q2 of values)
-    for (const q3 of values)
-      for (const q4 of values)
-        for (const q5 of values)
-          for (const q7 of values)
-            for (const q6 of [1, 5, 6, 10] as const)
-              strings.push(
-                ...getReinforcements({ q1: 2, q2, q3, q4, q5, q6, q7 }),
-              );
+  // Todos los bullets posibles.
+  strings.push(...Object.values(BULLETS), FALLBACK_BULLET);
 
   return strings;
 }
@@ -167,10 +217,8 @@ describe("compliance — sin puntajes ni promesas de resultado legal", () => {
   const copy = allUserFacingCopy();
 
   it("ningún texto contiene un puntaje numérico", () => {
-    // Excepción: "20 minutos" del microcopy y "Siete preguntas" son duración,
-    // no puntaje. Buscamos patrones de score explícito.
     for (const s of copy) {
-      expect(s).not.toMatch(/\b\d+\s*(\/|de)\s*\d+\b/); // "8/14", "8 de 14"
+      expect(s).not.toMatch(/\b\d+\s*(\/|de)\s*\d+\b/);
       expect(s).not.toMatch(/\bpuntaje\b/i);
       expect(s).not.toMatch(/\bpuntuaci[oó]n\b/i);
       expect(s).not.toMatch(/\bscore\b/i);
@@ -214,11 +262,12 @@ describe("compliance — sin puntajes ni promesas de resultado legal", () => {
     }
   });
 
-  it("ningún texto menciona precios", () => {
+  it("ningún texto menciona precios ni productos del cliente", () => {
     for (const s of copy) {
       expect(s).not.toMatch(/\$\s*\d/);
       expect(s).not.toMatch(/\bUSD\b/);
       expect(s).not.toMatch(/\bprecio\b/i);
+      expect(s).not.toMatch(/simulador/i);
     }
   });
 

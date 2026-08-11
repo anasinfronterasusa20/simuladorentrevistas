@@ -20,12 +20,14 @@ create table if not exists public.diagnostics (
   email             text not null,
   whatsapp          text not null,                    -- formato E.164 (+521234567890)
 
-  -- Respuestas: jsonb con las 7 claves q1..q7.
+  -- Respuestas: jsonb con las 12 claves q1..q12.
   respuestas        jsonb not null,
 
   -- Resultado.
   banda             text not null check (banda in ('alto', 'intermedio', 'por_reforzar')),
-  score_interno     smallint not null check (score_interno between 0 and 14),
+  -- Rango 0-24 = 12 preguntas × 2 puntos. Si cambia el número de preguntas,
+  -- hay que actualizar esta restricción (ver supabase/migrations/).
+  score_interno     smallint not null check (score_interno between 0 and 24),
 
   -- Consentimiento explícito de outreach (obligatorio para insertar).
   consent_outreach  boolean not null check (consent_outreach = true),
