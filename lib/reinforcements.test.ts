@@ -1,8 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
   getReinforcements,
+  getStrengths,
+  formatStrengths,
   FALLBACK_BULLET,
   MAX_BULLETS,
+  MAX_STRENGTHS,
 } from "./reinforcements";
 import { BAND_COPY, RESULT_COPY, UI_COPY } from "./content";
 import {
@@ -179,6 +182,95 @@ describe("getReinforcements — límite, prioridad y fallback", () => {
   });
 });
 
+describe("getStrengths / formatStrengths", () => {
+  it("no devuelve ninguna fortaleza cuando todo está en cero", () => {
+    expect(getStrengths(worst)).toEqual([]);
+    expect(formatStrengths(getStrengths(worst))).toBeNull();
+  });
+
+  it("nunca devuelve más de MAX_STRENGTHS", () => {
+    expect(getStrengths(perfect).length).toBe(MAX_STRENGTHS);
+    expect(MAX_STRENGTHS).toBe(3);
+  });
+
+  it("nombra solo lo que la persona efectivamente respondió bien", () => {
+    // Todo mal salvo documentación y fechas.
+    const a: Answers = { ...worst, q2: 2, q5: 2 };
+    expect(getStrengths(a)).toEqual([
+      "tu documentación está completa y traducida",
+      "tienes tus fechas confirmadas",
+    ]);
+  });
+
+  it("una fortaleza que no se cumple nunca aparece", () => {
+    // q4=1 (nunca la ha dicho en voz alta) no debe generar esa fortaleza.
+    const a: Answers = { ...perfect, q4: 1 };
+    expect(getStrengths(a)).not.toContain(
+      "ya has contado tu historia en voz alta",
+    );
+  });
+
+  it("la escala solo cuenta como fortaleza desde 8", () => {
+    const soloEscala = (q6: 1 | 7 | 8 | 10) =>
+      getStrengths({ ...worst, q6 });
+    expect(soloEscala(7)).toEqual([]);
+    expect(soloEscala(8)).toEqual(["te sientes con seguridad para responder"]);
+  });
+
+  it("arma la frase con la gramática correcta", () => {
+    expect(formatStrengths(["a"])).toBe("a");
+    expect(formatStrengths(["a", "b"])).toBe("a y b");
+    expect(formatStrengths(["a", "b", "c"])).toBe("a, b y c");
+  });
+
+  it("fortalezas y refuerzos nunca se contradicen entre sí", () => {
+    // Una misma dimensión no puede salir a la vez como logro y como brecha.
+    const pares: [keyof Answers, string, string][] = [
+      ["q9", "tu declaración ya cita tus evidencias", BULLETS.amarre],
+      ["q10", "tienes evidencia del contexto de tu país", BULLETS.contexto],
+      ["q11", "tu declaración y tu I-589 coinciden", BULLETS.cotejo],
+      ["q2", "tu documentación está completa y traducida", BULLETS.documentacion],
+      ["q5", "tienes tus fechas confirmadas", BULLETS.fechas],
+      ["q3", "tu carpeta está al día", BULLETS.carpeta],
+      ["q12", "tus cambios están reportados", BULLETS.cambios],
+    ];
+    for (const [key, fortaleza, brecha] of pares) {
+      for (const v of [0, 1, 2] as const) {
+        const a = { ...perfect, [key]: v } as Answers;
+        const s = getStrengths(a);
+        const r = getReinforcements(a);
+        expect(
+          s.includes(fortaleza) && r.includes(brecha),
+          `${key}=${v} sale como fortaleza y como brecha a la vez`,
+        ).toBe(false);
+      }
+    }
+  });
+
+  it("dos perfiles de la misma banda leen un resultado distinto", () => {
+    // La línea de fortalezas muestra siempre las de mayor prioridad, así que
+    // cuando dos perfiles solo difieren en dimensiones menores, esa línea
+    // puede coincidir. Lo que los distingue son los refuerzos. La lectura
+    // completa —fortalezas + refuerzos— sí tiene que diferir.
+    const a: Answers = { ...perfect, q2: 0, q3: 0 };
+    const b: Answers = { ...perfect, q4: 0, q7: 0 };
+
+    expect(grade(a).band).toBe(grade(b).band);
+
+    const lectura = (x: Answers) =>
+      `${formatStrengths(getStrengths(x))} || ${getReinforcements(x).join("|")}`;
+    expect(lectura(a)).not.toBe(lectura(b));
+  });
+
+  it("la línea de fortalezas varía cuando difieren las dimensiones de mayor peso", () => {
+    const a: Answers = { ...worst, q9: 2, q10: 2 };
+    const b: Answers = { ...worst, q2: 2, q5: 2 };
+    expect(formatStrengths(getStrengths(a))).not.toBe(
+      formatStrengths(getStrengths(b)),
+    );
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Compliance: barrido sobre TODO el copy visible al usuario.
 // ---------------------------------------------------------------------------
@@ -193,9 +285,17 @@ function allUserFacingCopy(): string[] {
 
   strings.push(
     RESULT_COPY.greeting("Ana"),
+    RESULT_COPY.strengthsPrefix,
     RESULT_COPY.reinforcementsTitle,
     RESULT_COPY.ctaMicrocopy,
   );
+
+  // Todas las frases de fortaleza posibles.
+  strings.push(...getStrengths(perfect));
+  for (const k of CHOICE_KEYS) {
+    strings.push(...getStrengths({ ...worst, [k]: 2 } as Answers));
+  }
+  strings.push(...getStrengths({ ...worst, q6: 10 }));
 
   strings.push(
     UI_COPY.intro.kicker,

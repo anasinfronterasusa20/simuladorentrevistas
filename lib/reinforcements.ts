@@ -92,3 +92,43 @@ export function getReinforcements(answers: Answers): string[] {
 
   return matched.length > 0 ? matched : [FALLBACK_BULLET];
 }
+
+// ---------------------------------------------------------------------------
+// Fortalezas: el espejo de las reglas de arriba.
+//
+// Nombra lo que la persona SÍ tiene resuelto, para que dos personas de la
+// misma banda no lean exactamente el mismo texto. Cada frase describe un
+// hecho que la persona reportó — nunca una consecuencia sobre su caso.
+// ---------------------------------------------------------------------------
+
+export const MAX_STRENGTHS = 3;
+
+// Orden = prioridad, igual que RULES: primero lo de mayor peso.
+const STRENGTH_RULES: { applies: (a: Answers) => boolean; text: string }[] = [
+  { applies: (a) => a.q9 === 2,  text: "tu declaración ya cita tus evidencias" },
+  { applies: (a) => a.q10 === 2, text: "tienes evidencia del contexto de tu país" },
+  { applies: (a) => a.q11 === 2, text: "tu declaración y tu I-589 coinciden" },
+  { applies: (a) => a.q8 === 2,  text: "presentaste dentro del primer año" },
+  { applies: (a) => a.q2 === 2,  text: "tu documentación está completa y traducida" },
+  { applies: (a) => a.q12 === 2, text: "tus cambios están reportados" },
+  { applies: (a) => a.q5 === 2,  text: "tienes tus fechas confirmadas" },
+  { applies: (a) => a.q4 === 2,  text: "ya has contado tu historia en voz alta" },
+  { applies: (a) => a.q3 === 2,  text: "tu carpeta está al día" },
+  { applies: (a) => a.q6 >= 8,   text: "te sientes con seguridad para responder" },
+  { applies: (a) => a.q7 === 2,  text: "ya sabías lo del intérprete" },
+];
+
+export function getStrengths(answers: Answers): string[] {
+  return STRENGTH_RULES.filter((r) => r.applies(answers))
+    .slice(0, MAX_STRENGTHS)
+    .map((r) => r.text);
+}
+
+// Une las fortalezas en una frase natural: "a", "a y b", "a, b y c".
+// Devuelve null si no hay ninguna — preferimos omitir la línea antes que
+// inventarle un logro a quien todavía no tiene ninguno.
+export function formatStrengths(strengths: string[]): string | null {
+  if (strengths.length === 0) return null;
+  if (strengths.length === 1) return strengths[0];
+  return `${strengths.slice(0, -1).join(", ")} y ${strengths[strengths.length - 1]}`;
+}

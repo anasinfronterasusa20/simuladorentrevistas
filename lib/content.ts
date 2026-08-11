@@ -225,8 +225,10 @@ export type BandCopy = {
 export const BAND_COPY: Record<Band, BandCopy> = {
   alto: {
     title: "Nivel de Preparación: Alto",
+    // El párrafo no afirma nada concreto sobre las respuestas de la persona:
+    // eso lo hace la línea de fortalezas, que sí sale de lo que respondió.
     paragraph:
-      "Vas bien. Tienes tu documentación en orden, tus fechas claras y ya has practicado contar tu historia. Eso te pone por delante de la mayoría de las personas que llegan a su entrevista.",
+      "Vas bien. Tu caso tiene estructura y llegas a esta etapa con más terreno cubierto que la mayoría de las personas que se preparan para su entrevista.",
     loop:
       "Lo que sigue no es empezar de cero — es **afinar**. Los detalles que marcan la diferencia en una entrevista real no se ven desde adentro, se detectan con alguien que ya ha estado en cientos de estos procesos.",
     cta: "Afinar mi preparación",
@@ -252,6 +254,7 @@ export const BAND_COPY: Record<Band, BandCopy> = {
 // Copy fijo de la pantalla de resultado (igual para las 3 bandas).
 export const RESULT_COPY = {
   greeting: (nombre: string) => (nombre ? `Listo, ${nombre}.` : "Listo."),
+  strengthsPrefix: "A tu favor:",
   reinforcementsTitle: "Lo que conviene reforzar",
   ctaMicrocopy: "Sin costo. 20 minutos. Hablas directamente con nuestro equipo.",
 } as const;

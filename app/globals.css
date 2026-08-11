@@ -693,6 +693,15 @@ a { color: inherit; text-decoration: none; }
   z-index: 1;
 }
 
+/* Línea de fortalezas — varía según lo que la persona respondió. */
+.result-strengths__prefix {
+  font-weight: 900;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+}
+
 /* Bloque "Lo que conviene reforzar" */
 .reinforce {
   margin: var(--sp-6) 0 0;

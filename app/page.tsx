@@ -13,7 +13,11 @@ import {
   UI_COPY,
   type Question,
 } from "@/lib/content";
-import { getReinforcements } from "@/lib/reinforcements";
+import {
+  formatStrengths,
+  getReinforcements,
+  getStrengths,
+} from "@/lib/reinforcements";
 import { renderRich } from "@/lib/renderRich";
 import type { Answers, Band, ChoiceAnswer, ScaleAnswer } from "@/lib/scoring";
 
@@ -522,6 +526,7 @@ function ResultStep({
 }) {
   const copy = BAND_COPY[band];
   const reinforcements = getReinforcements(answers);
+  const strengths = formatStrengths(getStrengths(answers));
 
   return (
     <section className="surface surface--navy on-navy">
@@ -532,6 +537,17 @@ function ResultStep({
       <h2 className="headline headline--hero headline--gold">{copy.title}</h2>
 
       <p className="body">{copy.paragraph}</p>
+
+      {/* Se omite por completo cuando no hay ninguna fortaleza: preferimos
+          decir menos antes que felicitar a alguien por algo que no tiene. */}
+      {strengths && (
+        <p className="body result-strengths">
+          <span className="result-strengths__prefix">
+            {RESULT_COPY.strengthsPrefix}
+          </span>{" "}
+          {strengths}.
+        </p>
+      )}
 
       <div className="reinforce">
         <h3 className="reinforce__title">
