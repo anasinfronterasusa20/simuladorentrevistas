@@ -1,5 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { isValidPhoneNumber } from "libphonenumber-js";
+import { buildCrmPayload, sendToCrm } from "@/lib/crm";
 import { grade, validateAnswers, type Answers } from "@/lib/scoring";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
@@ -64,9 +66,17 @@ export async function POST(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") ?? null;
   const referrer = req.headers.get("referer") ?? null;
 
+  // Generamos el id acá para poder mandárselo al CRM como clave de
+  // idempotencia sin tener que hacer un SELECT de vuelta contra una tabla
+  // que es solo-INSERT.
+  const id = randomUUID();
+  const createdAt = new Date().toISOString();
+
   try {
     const supabase = getSupabaseAdmin();
     const { error } = await supabase.from("diagnostics").insert({
+      id,
+      created_at: createdAt,
       nombre,
       email,
       whatsapp,
@@ -85,6 +95,28 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[submit] unexpected error", err);
     return NextResponse.json({ error: "internal_error" }, { status: 500 });
+  }
+
+  // -- CRM (Kommo vía n8n) ---------------------------------------------------
+  // Deliberadamente NO bloqueante para el resultado: el diagnóstico ya está
+  // guardado. Si el webhook falla, queda registrado en el log y la fila de
+  // Supabase permite reconciliar después. Nunca le negamos su resultado a
+  // alguien porque el CRM esté caído.
+  const crm = await sendToCrm(
+    buildCrmPayload({
+      id,
+      nombre,
+      email,
+      whatsapp,
+      band,
+      score,
+      answers,
+      webinarSource,
+      createdAt,
+    }),
+  );
+  if (!crm.ok && crm.reason !== "webhook_no_configurado") {
+    console.error(`[submit] fallo el webhook del CRM (${crm.reason}) id=${id}`);
   }
 
   // -- Respuesta al cliente --------------------------------------------------
