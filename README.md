@@ -138,7 +138,17 @@ supabase/
 next.config.ts            # CSP frame-ancestors para iframe
 ```
 
-## Próximos pasos (fuera de este build)
+## CRM (Kommo vía n8n)
 
-- Webhook a n8n → Kommo CRM: agregar POST a `CRM_WEBHOOK_URL` en `app/api/submit/route.ts` después del insert de Supabase.
+Cada diagnóstico completado dispara un `POST` a `CRM_WEBHOOK_URL` con el
+resultado, las respuestas legibles y los refuerzos. El envío no es bloqueante:
+si n8n falla, la fila ya quedó en Supabase y la persona ve su resultado igual.
+
+El workflow de n8n está especificado paso a paso en
+[`docs/n8n-kommo.md`](docs/n8n-kommo.md), incluida una trampa de la API de
+Kommo que puede borrar tags existentes si se actualiza mal.
+
+## Próximos pasos
+
 - Calibración de umbrales: revisar `THRESHOLDS` en `lib/scoring.ts` con data real después de las primeras 50-100 respuestas.
+- Supabase en plan gratuito pausa el proyecto por inactividad. Antes de un webinar en vivo, verificar que esté activo.
