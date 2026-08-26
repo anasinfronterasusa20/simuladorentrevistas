@@ -457,7 +457,7 @@ function OptInStep({
           </label>
           <PhoneInput
             id="whatsapp"
-            defaultCountry="MX"
+            defaultCountry="US"
             value={whatsapp}
             onChange={setWhatsapp}
             countryCallingCodeEditable={false}

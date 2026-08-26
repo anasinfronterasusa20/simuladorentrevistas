@@ -279,7 +279,12 @@ export const UI_COPY = {
     emailLabel: "Correo",
     emailPlaceholder: "tucorreo@ejemplo.com",
     whatsappLabel: "WhatsApp",
-    whatsappHelp: "Toca la bandera para elegir tu país.",
+    // Nombra el país por defecto de forma explícita. Sin el código a la vista,
+    // un número local de otro país puede pasar como válido en EE.UU. (por
+    // ejemplo 414… es Milwaukee y también Venezuela) y guardarse mal en
+    // silencio. Este texto es la única señal que tiene la persona.
+    whatsappHelp:
+      "Empieza en Estados Unidos. Si tu número es de otro país, toca la bandera para cambiarlo.",
     submitCta: "Ver mi resultado",
     submitting: "Preparando tu resultado...",
   },
