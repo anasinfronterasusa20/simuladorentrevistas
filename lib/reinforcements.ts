@@ -14,74 +14,78 @@ export const MAX_BULLETS = 3;
 
 // Fallback cuando ninguna regla se activa (solo alcanzable en banda Alto:
 // con todas las dimensiones en su mejor opción el score siempre cae en Alto).
-export const FALLBACK_BULLET =
-  "Repasar los detalles finos de tu relato antes de la cita";
+export const FALLBACK_BULLET = "Los detalles finos de tu relato";
 
 // Orden = prioridad. Se toman los primeros MAX_BULLETS que apliquen.
 //
 // Las primeras cinco reglas corresponden a las "debilidades típicas" de la
 // presentación de ventas: son las brechas de mayor consecuencia, así que
 // desplazan a las de logística cuando ambas aplican.
+//
+// El texto NOMBRA el área que conviene revisar — no describe el paso a
+// paso ni la técnica para resolverla. Eso es intencional: el "cómo" es
+// justo lo que se resuelve en la llamada, no algo que la herramienta deba
+// entregar gratis en la pantalla de resultado.
 const RULES: { applies: (a: Answers) => boolean; text: string }[] = [
   {
     // Q8 — presentó fuera del año sin excepción argumentada.
     applies: (a) => a.q8 === 0,
-    text: "Revisar si te aplica una excepción al plazo del primer año",
+    text: "El plazo del primer año para presentar tu solicitud",
   },
   {
     // Q9 — la declaración no cita las evidencias (el amarre).
     applies: (a) => a.q9 <= 1,
-    text: "Conectar cada evidencia con el párrafo de tu declaración",
+    text: "La conexión entre tu declaración y tus evidencias",
   },
   {
     // Q10 — sin expediente de condiciones de país.
     applies: (a) => a.q10 <= 1,
-    text: "Sumar evidencia de contexto sobre lo que ocurre en tu país",
+    text: "La evidencia de contexto sobre lo que pasa en tu país",
   },
   {
     // Q11 — posible inconsistencia entre declaración e I-589.
     applies: (a) => a.q11 <= 1,
-    text: "Cotejar tu declaración con tu I-589 línea por línea",
+    text: "La consistencia entre tu declaración y tu I-589",
   },
   {
     // Q12 — cambios sin reportar desde la solicitud.
     applies: (a) => a.q12 <= 1,
-    text: "Reportar los cambios ocurridos desde que presentaste tu caso",
+    text: "Los cambios sin reportar desde que presentaste tu caso",
   },
   {
     // Q2 — documentación incompleta o sin traducir/certificar.
     applies: (a) => a.q2 <= 1,
-    text: "Completar y certificar tu documentación",
+    text: "La traducción y organización de tu documentación",
   },
   {
     // Q5 — fechas clave inciertas (total o parcialmente).
     applies: (a) => a.q5 <= 1,
-    text: "Fijar con precisión las fechas clave de tu caso",
+    text: "Las fechas clave de tu caso",
   },
   {
     // Q4 — le cuesta siquiera pensar la historia completa.
     applies: (a) => a.q4 === 0,
-    text: "Trabajar cómo contar tu historia sin bloquearte",
+    text: "Qué tan lista tienes tu historia para contarla",
   },
   {
     // Q4 — la tiene clara pero nunca la ha dicho en voz alta.
     applies: (a) => a.q4 === 1,
-    text: "Practicar tu relato en voz alta antes de la entrevista",
+    text: "La práctica de tu relato en voz alta",
   },
   {
     // Q3 — carpeta de evidencias desactualizada.
     applies: (a) => a.q3 <= 1,
-    text: "Actualizar tu carpeta de documentos y evidencias",
+    text: "Qué tan actualizada está tu carpeta de evidencias",
   },
   {
     // Q6 — baja confianza para responder bajo presión.
     applies: (a) => a.q6 <= 5,
-    text: "Ganar seguridad para responder bajo presión",
+    text: "Tu seguridad para responder bajo presión",
   },
   {
     // Q7 — no sabía que necesita intérprete.
     applies: (a) => a.q7 === 0,
-    text: "Conseguir un intérprete para el día de tu entrevista",
+    text: "El intérprete para el día de tu entrevista",
   },
 ];
 

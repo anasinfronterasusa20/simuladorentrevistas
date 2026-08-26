@@ -26,18 +26,18 @@ const perfect = uniform(2, 10);
 const worst = uniform(0, 1);
 
 const BULLETS = {
-  plazo: "Revisar si te aplica una excepción al plazo del primer año",
-  amarre: "Conectar cada evidencia con el párrafo de tu declaración",
-  contexto: "Sumar evidencia de contexto sobre lo que ocurre en tu país",
-  cotejo: "Cotejar tu declaración con tu I-589 línea por línea",
-  cambios: "Reportar los cambios ocurridos desde que presentaste tu caso",
-  documentacion: "Completar y certificar tu documentación",
-  fechas: "Fijar con precisión las fechas clave de tu caso",
-  bloqueo: "Trabajar cómo contar tu historia sin bloquearte",
-  vozAlta: "Practicar tu relato en voz alta antes de la entrevista",
-  carpeta: "Actualizar tu carpeta de documentos y evidencias",
-  presion: "Ganar seguridad para responder bajo presión",
-  interprete: "Conseguir un intérprete para el día de tu entrevista",
+  plazo: "El plazo del primer año para presentar tu solicitud",
+  amarre: "La conexión entre tu declaración y tus evidencias",
+  contexto: "La evidencia de contexto sobre lo que pasa en tu país",
+  cotejo: "La consistencia entre tu declaración y tu I-589",
+  cambios: "Los cambios sin reportar desde que presentaste tu caso",
+  documentacion: "La traducción y organización de tu documentación",
+  fechas: "Las fechas clave de tu caso",
+  bloqueo: "Qué tan lista tienes tu historia para contarla",
+  vozAlta: "La práctica de tu relato en voz alta",
+  carpeta: "Qué tan actualizada está tu carpeta de evidencias",
+  presion: "Tu seguridad para responder bajo presión",
+  interprete: "El intérprete para el día de tu entrevista",
 } as const;
 
 describe("getReinforcements — debilidades típicas (prioridad alta)", () => {

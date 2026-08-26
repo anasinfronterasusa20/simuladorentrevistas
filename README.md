@@ -58,13 +58,15 @@ Cubren el motor de scoring, los umbrales de bandas y guardas de compliance (que 
 En una página de Elementor, agrega un widget HTML con este código:
 
 ```html
-<iframe
-  id="sfg-diagnostico"
-  src="https://diagnostico.infosfg.com/"
-  style="width:100%;border:0;min-height:800px"
-  loading="lazy"
-  title="Diagnóstico SFG"
-></iframe>
+<div style="display:block;width:100%;">
+  <iframe
+    id="sfg-diagnostico"
+    src="https://diagnostico.infosfg.com/"
+    width="100%"
+    style="display:block;width:100%;border:0;min-height:800px"
+    title="Diagnóstico SFG"
+  ></iframe>
+</div>
 
 <script>
   // Auto-resize del iframe según altura real del contenido.
@@ -77,6 +79,14 @@ En una página de Elementor, agrega un widget HTML con este código:
   });
 </script>
 ```
+
+Cambios respecto a una versión anterior de este snippet: se quitó `loading="lazy"` (el widget es contenido principal de la página, no hay razón para diferir su carga, y algunos navegadores calculan mal el ancho de un iframe lazy dentro de contenedores flex de Elementor) y se envolvió en un `<div>` de bloque explícito con `width="100%"` también como atributo HTML, no solo como estilo — esto evita que el iframe, al ser un elemento reemplazado dentro de un contenedor `display:flex` de Elementor (`.e-con`), herede un ancho intrínseco en vez del 100% esperado.
+
+### Si el widget se ve "achicado" o como versión de escritorio en un celular real
+
+1. **Primero, borra caché / prueba en incógnito** en ese mismo celular, en la página de WordPress. Es la causa más común: el CDN de Vercel cachea la página en distintos servidores según la región, y un dispositivo puede estar viendo una versión anterior hasta que esa caché expire (normalmente minutos, a veces más).
+2. Si con caché limpia el problema persiste, revisa si Chrome tiene activado **"Ver sitio de escritorio"** para `infosfg.com` (menú ⋮ → checkbox) — actívalo/desactívalo y recarga.
+3. Si nada de eso resuelve, es un bug real del embed — reporta con captura + modelo de teléfono + navegador exacto.
 
 El link post-webinar puede llevar un parámetro opcional para trackear la fuente:
 
