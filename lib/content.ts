@@ -239,7 +239,7 @@ export const BAND_COPY: Record<Band, BandCopy> = {
       "Tienes avanzado lo esencial, pero hay piezas sueltas. No es que estés mal preparado — es que todavía no tienes todo junto y en orden, y eso en una entrevista se nota.",
     loop:
       "Ya sabes en qué punto estás. Lo que todavía no tienes es el **plan exacto** para cerrar esas brechas antes de tu fecha. Eso es justo lo que resolvemos en una llamada.",
-    cta: "Ver mi plan de preparación",
+    cta: "Quiero que vean mi caso",
   },
   por_reforzar: {
     title: "Nivel de Preparación: Por Reforzar",
