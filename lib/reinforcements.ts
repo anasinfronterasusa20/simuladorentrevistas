@@ -16,81 +16,103 @@ export const MAX_BULLETS = 3;
 // con todas las dimensiones en su mejor opción el score siempre cae en Alto).
 export const FALLBACK_BULLET = "Los detalles finos de tu relato";
 
-// Orden = prioridad. Se toman los primeros MAX_BULLETS que apliquen.
+// Cada regla devuelve la GRAVEDAD de la brecha según lo que respondió la
+// persona: 2 = brecha abierta, 1 = brecha parcial, 0 = no aplica.
 //
-// Las primeras cinco reglas corresponden a las "debilidades típicas" de la
-// presentación de ventas: son las brechas de mayor consecuencia, así que
-// desplazan a las de logística cuando ambas aplican.
+// La selección ordena por gravedad, no por un orden fijo de reglas. Ese es
+// el punto: con orden fijo, las cinco preguntas difíciles —que casi nadie
+// responde bien— copaban siempre los tres espacios, y dos personas con
+// perfiles muy distintos leían exactamente los mismos refuerzos. Ordenando
+// por gravedad, lo que aparece es lo que ESA persona respondió peor.
+//
+// El orden del array sigue importando, pero solo para desempatar entre
+// brechas de la misma gravedad: ahí sí mandan primero las "debilidades
+// típicas" de la presentación de ventas, que son las de mayor consecuencia.
 //
 // El texto NOMBRA el área que conviene revisar — no describe el paso a
 // paso ni la técnica para resolverla. Eso es intencional: el "cómo" es
-// justo lo que se resuelve en la llamada, no algo que la herramienta deba
-// entregar gratis en la pantalla de resultado.
-const RULES: { applies: (a: Answers) => boolean; text: string }[] = [
+// justo lo que se trabaja en la llamada, no algo que la herramienta deba
+// entregar en la pantalla de resultado.
+type Severity = 0 | 1 | 2;
+
+// Atajo para las preguntas ordinales: 0 → brecha abierta, 1 → parcial.
+const ordinal = (v: number): Severity => (v === 0 ? 2 : v === 1 ? 1 : 0);
+
+const RULES: { severity: (a: Answers) => Severity; text: string }[] = [
   {
-    // Q8 — presentó fuera del año sin excepción argumentada.
-    applies: (a) => a.q8 === 0,
+    // Q8 — fuera del plazo. Solo es brecha si además no hay excepción
+    // argumentada; con excepción planteada (valor 1) no cuenta.
+    severity: (a) => (a.q8 === 0 ? 2 : 0),
     text: "El plazo del primer año para presentar tu solicitud",
   },
   {
     // Q9 — la declaración no cita las evidencias (el amarre).
-    applies: (a) => a.q9 <= 1,
+    severity: (a) => ordinal(a.q9),
     text: "La conexión entre tu declaración y tus evidencias",
   },
   {
     // Q10 — sin expediente de condiciones de país.
-    applies: (a) => a.q10 <= 1,
+    severity: (a) => ordinal(a.q10),
     text: "La evidencia de contexto sobre lo que pasa en tu país",
   },
   {
     // Q11 — posible inconsistencia entre declaración e I-589.
-    applies: (a) => a.q11 <= 1,
+    severity: (a) => ordinal(a.q11),
     text: "La consistencia entre tu declaración y tu I-589",
   },
   {
     // Q12 — cambios sin reportar desde la solicitud.
-    applies: (a) => a.q12 <= 1,
+    severity: (a) => ordinal(a.q12),
     text: "Los cambios sin reportar desde que presentaste tu caso",
   },
   {
     // Q2 — documentación incompleta o sin traducir/certificar.
-    applies: (a) => a.q2 <= 1,
+    severity: (a) => ordinal(a.q2),
     text: "La traducción y organización de tu documentación",
   },
   {
     // Q5 — fechas clave inciertas (total o parcialmente).
-    applies: (a) => a.q5 <= 1,
+    severity: (a) => ordinal(a.q5),
     text: "Las fechas clave de tu caso",
   },
   {
     // Q4 — le cuesta siquiera pensar la historia completa.
-    applies: (a) => a.q4 === 0,
+    severity: (a) => (a.q4 === 0 ? 2 : 0),
     text: "Qué tan lista tienes tu historia para contarla",
   },
   {
     // Q4 — la tiene clara pero nunca la ha dicho en voz alta.
-    applies: (a) => a.q4 === 1,
+    // Excluyente con la anterior: son estados distintos de la misma
+    // pregunta, así que nunca pueden salir las dos.
+    severity: (a) => (a.q4 === 1 ? 1 : 0),
     text: "La práctica de tu relato en voz alta",
   },
   {
     // Q3 — carpeta de evidencias desactualizada.
-    applies: (a) => a.q3 <= 1,
+    severity: (a) => ordinal(a.q3),
     text: "Qué tan actualizada está tu carpeta de evidencias",
   },
   {
     // Q6 — baja confianza para responder bajo presión.
-    applies: (a) => a.q6 <= 5,
+    // 1-3 es brecha abierta; 4-5 parcial; 6+ no aplica.
+    severity: (a) => (a.q6 <= 3 ? 2 : a.q6 <= 5 ? 1 : 0),
     text: "Tu seguridad para responder bajo presión",
   },
   {
-    // Q7 — no sabía que necesita intérprete.
-    applies: (a) => a.q7 === 0,
+    // Q7 — no sabía que necesita intérprete. Es sí/no: o es brecha o no.
+    severity: (a) => (a.q7 === 0 ? 2 : 0),
     text: "El intérprete para el día de tu entrevista",
   },
 ];
 
 export function getReinforcements(answers: Answers): string[] {
-  const matched = RULES.filter((r) => r.applies(answers))
+  const matched = RULES
+    .map((r, index) => ({ text: r.text, sev: r.severity(answers), index }))
+    .filter((r) => r.sev > 0)
+    // Gravedad primero; el orden del array solo desempata. `sort` en JS es
+    // estable, pero comparamos el índice de forma explícita para no
+    // depender de ese detalle.
+    .sort((a, b) => b.sev - a.sev || a.index - b.index)
     .slice(0, MAX_BULLETS)
     .map((r) => r.text);
 

@@ -229,16 +229,20 @@ export const BAND_COPY: Record<Band, BandCopy> = {
     // eso lo hace la línea de fortalezas, que sí sale de lo que respondió.
     paragraph:
       "Vas bien. Tu caso tiene estructura y llegas a esta etapa con más terreno cubierto que la mayoría de las personas que se preparan para su entrevista.",
+    // Sin afirmar que revisar esos detalles cambie el resultado del caso:
+    // describimos qué se hace en la llamada, no qué se consigue con ella.
     loop:
-      "Lo que sigue no es empezar de cero — es **afinar**. Los detalles que marcan la diferencia en una entrevista real no se ven desde adentro, se detectan con alguien que ya ha estado en cientos de estos procesos.",
+      "Lo que sigue no es empezar de cero — es **afinar**. Hay detalles que cuesta ver desde adentro, y que alguien con experiencia en estos procesos sí alcanza a notar.",
     cta: "Afinar mi preparación",
   },
   intermedio: {
     title: "Nivel de Preparación: Intermedio",
     paragraph:
       "Tienes avanzado lo esencial, pero hay piezas sueltas. No es que estés mal preparado — es que todavía no tienes todo junto y en orden, y eso en una entrevista se nota.",
+    // "revisamos contigo" en vez de "resolvemos": describe la conversación,
+    // no promete que la brecha quede cerrada.
     loop:
-      "Ya sabes en qué punto estás. Lo que todavía no tienes es el **plan exacto** para cerrar esas brechas antes de tu fecha. Eso es justo lo que resolvemos en una llamada.",
+      "Ya sabes en qué punto estás. Lo que todavía no tienes es el **orden exacto** para trabajar esas brechas antes de tu fecha. Eso es lo que revisamos contigo en una llamada.",
     cta: "Quiero que vean mi caso",
   },
   por_reforzar: {
@@ -256,7 +260,7 @@ export const RESULT_COPY = {
   greeting: (nombre: string) => (nombre ? `Listo, ${nombre}.` : "Listo."),
   strengthsPrefix: "A tu favor:",
   reinforcementsTitle: "Lo que conviene reforzar",
-  ctaMicrocopy: "Sin costo. 20 minutos. Hablas directamente con nuestro equipo.",
+  ctaMicrocopy: "Sin costo. Hablas directamente con nuestro equipo.",
 } as const;
 
 // Copy transversal de la UI.

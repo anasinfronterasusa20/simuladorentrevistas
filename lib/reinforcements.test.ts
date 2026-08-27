@@ -161,6 +161,48 @@ describe("getReinforcements — límite, prioridad y fallback", () => {
     ]);
   });
 
+  it("prioriza la brecha más grave por encima del orden de las reglas", () => {
+    // q7 (intérprete) es la última regla del array, pero si es la única
+    // brecha abierta y las demás son parciales, debe encabezar la lista.
+    const a: Answers = {
+      ...perfect,
+      q7: 0,          // brecha abierta
+      q9: 1, q10: 1,  // parciales, y de mayor prioridad en el array
+    };
+    expect(getReinforcements(a)[0]).toBe(BULLETS.interprete);
+  });
+
+  it("perfiles distintos con la misma banda reciben refuerzos distintos", () => {
+    // Este test existe porque una versión anterior ordenaba por un orden
+    // fijo de reglas: las cinco preguntas difíciles copaban siempre los tres
+    // espacios y casi todo el mundo leía exactamente lo mismo.
+    const perfiles: Answers[] = [
+      { ...perfect, q2: 0, q5: 0, q3: 0 },
+      { ...perfect, q4: 0, q6: 2, q7: 0 },
+      { ...perfect, q9: 0, q10: 0, q11: 0 },
+      { ...perfect, q8: 0, q12: 0, q2: 0 },
+    ];
+    const lecturas = perfiles.map((p) => getReinforcements(p).join("|"));
+    expect(new Set(lecturas).size, "hay perfiles que leen lo mismo").toBe(
+      perfiles.length,
+    );
+  });
+
+  it("una brecha abierta desplaza a una parcial de mayor prioridad", () => {
+    const soloParciales: Answers = { ...perfect, q9: 1, q10: 1, q11: 1 };
+    const conUnaAbierta: Answers = { ...soloParciales, q3: 0 };
+    expect(getReinforcements(soloParciales)).not.toContain(BULLETS.carpeta);
+    expect(getReinforcements(conUnaAbierta)[0]).toBe(BULLETS.carpeta);
+  });
+
+  it("las dos reglas de q4 nunca salen juntas", () => {
+    for (const q4 of [0, 1, 2] as const) {
+      const r = getReinforcements({ ...perfect, q4 });
+      const ambas = r.includes(BULLETS.bloqueo) && r.includes(BULLETS.vozAlta);
+      expect(ambas, `q4=${q4} produjo las dos variantes`).toBe(false);
+    }
+  });
+
   it("usa el fallback cuando nada aplica (solo alcanzable en banda Alto)", () => {
     expect(getReinforcements(perfect)).toEqual([FALLBACK_BULLET]);
     expect(grade(perfect).band).toBe("alto");
@@ -335,12 +377,29 @@ describe("compliance — sin puntajes ni promesas de resultado legal", () => {
       /ser[aá] aprobad/i,
       /aprobaci[oó]n asegurad/i,
       /te aseguramos/i,
-      /\b[eé]xito asegurad/i,
+      // "éxito", "chances" y "posibilidades" insinúan resultado aunque no lo
+      // afirmen. Fuera del vocabulario de esta herramienta por completo.
+      /\b[eé]xito/i,
+      /\bchances\b/i,
+      /\bposibilidades\b/i,
+      /\basegura(r|mos|do)\b/i,
+      // Frases que implican que la preparación cambia el desenlace.
+      /marca(n|r)? la diferencia/i,
+      /mejora(r|s|n)? tu caso/i,
+      /aumenta(r|s|n)?\b.*\b(caso|resultado)/i,
     ];
     for (const s of copy) {
       for (const re of forbidden) {
         expect(s, `texto: "${s}"`).not.toMatch(re);
       }
+    }
+  });
+
+  it("ningún texto promete una duración de la llamada", () => {
+    // Prometer "20 minutos" es un compromiso operativo que el equipo puede
+    // no cumplir, y no aporta nada a la decisión de agendar.
+    for (const s of copy) {
+      expect(s, `texto: "${s}"`).not.toMatch(/\b\d+\s*(min|minutos|hora|horas)\b/i);
     }
   });
 
