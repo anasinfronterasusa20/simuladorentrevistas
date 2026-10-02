@@ -25,7 +25,7 @@ type Step =
   | { kind: "intro" }
   | { kind: "question"; index: number }
   | { kind: "optin" }
-  | { kind: "result"; band: Band; nombre: string };
+  | { kind: "result"; band: Band };
 
 type PartialAnswers = Partial<Answers>;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -144,16 +144,13 @@ function Diagnostico() {
             answers={answers as Answers}
             webinarSource={webinarSource}
             onBack={goBack}
-            onDone={(band, nombre) =>
-              setStep({ kind: "result", band, nombre })
-            }
+            onDone={(band) => setStep({ kind: "result", band })}
           />
         )}
 
         {step.kind === "result" && (
           <ResultStep
             band={step.band}
-            nombre={step.nombre}
             answers={answers as Answers}
           />
         )}
@@ -348,9 +345,8 @@ function OptInStep({
   answers: Answers;
   webinarSource: string | null;
   onBack: () => void;
-  onDone: (band: Band, nombre: string) => void;
+  onDone: (band: Band) => void;
 }) {
-  const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState<string | undefined>(undefined);
   const [consent, setConsent] = useState(false);
@@ -365,7 +361,6 @@ function OptInStep({
     if (submitting) return;
     setError(null);
 
-    if (!nombre.trim()) return setError(UI_COPY.errors.missingFields);
     if (!EMAIL_RE.test(email.trim()))
       return setError(UI_COPY.errors.invalidEmail);
     if (!whatsapp || !isValidPhoneNumber(whatsapp))
@@ -381,7 +376,6 @@ function OptInStep({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nombre: nombre.trim(),
           email: email.trim(),
           whatsapp,
           consent_outreach: true,
@@ -396,7 +390,7 @@ function OptInStep({
         return;
       }
       const data = (await res.json()) as { band: Band };
-      onDone(data.band, nombre.trim());
+      onDone(data.band);
     } catch (err) {
       if ((err as { name?: string })?.name === "AbortError") return;
       setError(UI_COPY.errors.generic);
@@ -415,24 +409,6 @@ function OptInStep({
       <p className="accent">{UI_COPY.optIn.accent}</p>
 
       <form className="form" onSubmit={onSubmit} noValidate>
-        <div className="field">
-          <label className="field__label" htmlFor="nombre">
-            {UI_COPY.optIn.nombreLabel}
-          </label>
-          <input
-            id="nombre"
-            className="input"
-            type="text"
-            autoComplete="given-name"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder={UI_COPY.optIn.nombrePlaceholder}
-            maxLength={120}
-            disabled={submitting}
-            required
-          />
-        </div>
-
         <div className="field">
           <label className="field__label" htmlFor="email">
             {UI_COPY.optIn.emailLabel}
@@ -517,11 +493,9 @@ function OptInStep({
 
 function ResultStep({
   band,
-  nombre,
   answers,
 }: {
   band: Band;
-  nombre: string;
   answers: Answers;
 }) {
   const copy = BAND_COPY[band];
@@ -532,7 +506,7 @@ function ResultStep({
     <section className="surface surface--navy on-navy">
       <BrandStrip variant="on-navy" />
 
-      <p className="result-greeting">{RESULT_COPY.greeting(nombre)}</p>
+      <p className="result-greeting">{RESULT_COPY.greeting("")}</p>
 
       <h2 className="headline headline--hero headline--gold">{copy.title}</h2>
 

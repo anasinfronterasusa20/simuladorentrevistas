@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { buildCrmPayload, sendToCrm } from "@/lib/crm";
 import { grade, validateAnswers, type Answers } from "@/lib/scoring";
@@ -11,7 +11,6 @@ export const dynamic = "force-dynamic";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type SubmitPayload = {
-  nombre?: unknown;
   email?: unknown;
   whatsapp?: unknown;
   consent_outreach?: unknown;
@@ -28,15 +27,11 @@ export async function POST(req: NextRequest) {
   }
 
   // -- Validación de campos de contacto --------------------------------------
-  const nombre = typeof body.nombre === "string" ? body.nombre.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
   const whatsapp =
     typeof body.whatsapp === "string" ? body.whatsapp.trim() : "";
   const consent = body.consent_outreach === true;
 
-  if (!nombre || nombre.length > 120) {
-    return NextResponse.json({ error: "invalid_nombre" }, { status: 400 });
-  }
   if (!EMAIL_RE.test(email) || email.length > 200) {
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
@@ -77,7 +72,7 @@ export async function POST(req: NextRequest) {
     const { error } = await supabase.from("diagnostics").insert({
       id,
       created_at: createdAt,
-      nombre,
+      nombre: "",
       email,
       whatsapp,
       respuestas: answers,
@@ -98,26 +93,37 @@ export async function POST(req: NextRequest) {
   }
 
   // -- CRM (Kommo vía n8n) ---------------------------------------------------
-  // Deliberadamente NO bloqueante para el resultado: el diagnóstico ya está
-  // guardado. Si el webhook falla, queda registrado en el log y la fila de
-  // Supabase permite reconciliar después. Nunca le negamos su resultado a
-  // alguien porque el CRM esté caído.
-  const crm = await sendToCrm(
-    buildCrmPayload({
-      id,
-      nombre,
-      email,
-      whatsapp,
-      band,
-      score,
-      answers,
-      webinarSource,
-      createdAt,
-    }),
-  );
-  if (!crm.ok && crm.reason !== "webhook_no_configurado") {
-    console.error(`[submit] fallo el webhook del CRM (${crm.reason}) id=${id}`);
-  }
+  // NO bloquea la respuesta: el diagnóstico ya está guardado, así que la
+  // persona ve su resultado de inmediato. `after()` mantiene viva la función
+  // serverless hasta que termine el envío (en Vercel usa waitUntil por
+  // dentro); un `sendToCrm()` suelto sin él podría cortarse al responder.
+  // Si el webhook falla, queda en el log y la fila de Supabase permite
+  // reconciliar después. Nunca le negamos su resultado a alguien porque el
+  // CRM esté caído.
+  after(async () => {
+    try {
+      const crm = await sendToCrm(
+        buildCrmPayload({
+          id,
+          nombre: "",
+          email,
+          whatsapp,
+          band,
+          score,
+          answers,
+          webinarSource,
+          createdAt,
+        }),
+      );
+      if (!crm.ok && crm.reason !== "webhook_no_configurado") {
+        console.error(
+          `[submit] fallo el webhook del CRM (${crm.reason}) id=${id}`,
+        );
+      }
+    } catch (err) {
+      console.error(`[submit] error inesperado enviando al CRM id=${id}`, err);
+    }
+  });
 
   // -- Respuesta al cliente --------------------------------------------------
   // COMPLIANCE: solo devolvemos la banda. Nunca el score numérico.
