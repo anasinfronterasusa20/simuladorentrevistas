@@ -69,7 +69,9 @@ export function buildCrmPayload(input: {
 
     // Contacto. El teléfono ya viene normalizado a E.164 (+58412…), que es
     // el formato con el que Kommo puede hacer match contra WhatsApp.
-    nombre: input.nombre,
+    // El formulario ya no pide nombre: si viene vacío mandamos el correo para
+    // que el título del lead y el contacto en Kommo no queden en blanco.
+    nombre: input.nombre.trim() || input.email,
     email: input.email,
     whatsapp: input.whatsapp,
 
