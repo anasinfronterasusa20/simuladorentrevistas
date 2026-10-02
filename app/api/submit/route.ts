@@ -11,7 +11,6 @@ export const dynamic = "force-dynamic";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type SubmitPayload = {
-  nombre?: unknown;
   email?: unknown;
   whatsapp?: unknown;
   consent_outreach?: unknown;
@@ -28,15 +27,11 @@ export async function POST(req: NextRequest) {
   }
 
   // -- Validación de campos de contacto --------------------------------------
-  const nombre = typeof body.nombre === "string" ? body.nombre.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
   const whatsapp =
     typeof body.whatsapp === "string" ? body.whatsapp.trim() : "";
   const consent = body.consent_outreach === true;
 
-  if (!nombre || nombre.length > 120) {
-    return NextResponse.json({ error: "invalid_nombre" }, { status: 400 });
-  }
   if (!EMAIL_RE.test(email) || email.length > 200) {
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
@@ -77,7 +72,7 @@ export async function POST(req: NextRequest) {
     const { error } = await supabase.from("diagnostics").insert({
       id,
       created_at: createdAt,
-      nombre,
+      nombre: "",
       email,
       whatsapp,
       respuestas: answers,
@@ -105,7 +100,7 @@ export async function POST(req: NextRequest) {
   const crm = await sendToCrm(
     buildCrmPayload({
       id,
-      nombre,
+      nombre: "",
       email,
       whatsapp,
       band,

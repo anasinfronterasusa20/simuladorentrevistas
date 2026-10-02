@@ -11,7 +11,7 @@ export const CALENDLY_URL =
   "https://calendly.com/asesoriasinfronterasglobal03/diagnostico-de-viabilidad-webinar";
 
 export const CONSENT_COPY =
-  "Acepto que el equipo de Sin Fronteras Global me contacte por correo o WhatsApp para darle seguimiento a mi diagnóstico. Tus respuestas nos ayudan a prepararte mejor — no se comparten con nadie más.";
+  "Acepto que el equipo de Sin Fronteras Global me envíe información sobre sus servicios. Entiendo que las respuestas no se comparten con nadie más.";
 
 // ---------------------------------------------------------------------------
 // Preguntas — orden y texto fijos por instrucción del cliente.
@@ -277,9 +277,7 @@ export const UI_COPY = {
   },
   optIn: {
     title: "Un último paso antes de tu resultado",
-    accent: "Para que podamos darle seguimiento a tu resultado.",
-    nombreLabel: "Nombre",
-    nombrePlaceholder: "Tu nombre",
+    accent: "Confírmanos el correo que nos indicaste antes",
     emailLabel: "Correo",
     emailPlaceholder: "tucorreo@ejemplo.com",
     whatsappLabel: "WhatsApp",
@@ -288,7 +286,7 @@ export const UI_COPY = {
     // ejemplo 414… es Milwaukee y también Venezuela) y guardarse mal en
     // silencio. Este texto es la única señal que tiene la persona.
     whatsappHelp:
-      "Empieza en Estados Unidos. Si tu número es de otro país, toca la bandera para cambiarlo.",
+      "Si actualmente tu número es de otro país, toca la bandera para cambiarlo",
     submitCta: "Ver mi resultado",
     submitting: "Preparando tu resultado...",
   },
